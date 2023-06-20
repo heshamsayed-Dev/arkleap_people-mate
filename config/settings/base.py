@@ -45,6 +45,8 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
+#TODO Create credentails for development and save it in environment variables
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
