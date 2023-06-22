@@ -12,3 +12,6 @@ class Employee(models.Model):
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="updated_employees", null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
+
+    # test precommit
+    print("hello")
