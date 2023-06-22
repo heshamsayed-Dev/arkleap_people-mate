@@ -7,6 +7,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
       model=Employee  
       fields = '__all__'
       extra_kwargs={
+            'created_by':{'write_only': True},
             'updated_by': {'write_only': True},
             'created_at' : {'write_only':True},
             'updated_at' : {'write_only':True},
