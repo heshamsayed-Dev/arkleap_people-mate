@@ -1,5 +1,6 @@
-from company_model import Company
 from django.db import models
+
+from .company_model import Company
 
 
 class CompanyBranch(models.Model):
