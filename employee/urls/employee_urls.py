@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import EmployeeListView, EmployeeDetailView, EmployeeCreateView, EmployeeUpdateView, EmployeeDeleteView
+from employee.views import EmployeeListView, EmployeeDetailView, EmployeeCreateView, EmployeeUpdateView, EmployeeDeleteView
 
 urlpatterns = [
     path('', EmployeeListView.as_view(), name='employee_list'),

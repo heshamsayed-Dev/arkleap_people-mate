@@ -16,7 +16,9 @@ urlpatterns = [
     # User management
     path("users/", include("people_mate.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    path("employees/", include("employee.urls")),
+    path("employees/", include("employee.urls.employee_urls")),
+    path("companies/", include("employee.urls.company_urls")),
+    path("branches/", include("employee.urls.company_branch_urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
