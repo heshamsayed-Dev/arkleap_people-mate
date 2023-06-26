@@ -15,7 +15,7 @@ class EmployeeCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=query_dict)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return Response(serializer.data)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 
 
