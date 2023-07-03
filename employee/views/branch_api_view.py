@@ -8,12 +8,14 @@ from rest_framework.views import APIView
 from employee.models.company_branch_model import CompanyBranch
 from employee.serializers.company_branch_serializer import CompanyBranchSerializer
 
+from .utils import get_model_by_pk
+
 
 class CompanyBranchAPIView(APIView):
     def get(self, request, pk=None):
         try:
             if pk:
-                branch = self.get_branch_by_pk(pk)
+                branch = get_model_by_pk("CompanyBranch", pk)
                 serializer = CompanyBranchSerializer(branch)
             else:
                 branches = CompanyBranch.objects.all()
@@ -32,7 +34,7 @@ class CompanyBranchAPIView(APIView):
 
     def put(self, request, pk):
         try:
-            branch = self.get_branch_by_pk(pk)
+            branch = get_model_by_pk("CompanyBranch", pk)
             query_dict = QueryDict("", mutable=True)
             query_dict.update(request.data)
             query_dict["updated_at"] = datetime.now()
@@ -48,7 +50,7 @@ class CompanyBranchAPIView(APIView):
 
     def patch(self, request, pk):
         try:
-            branch = self.get_branch_by_pk(pk)
+            branch = get_model_by_pk("CompanyBranch", pk)
             query_dict = QueryDict("", mutable=True)
             query_dict.update(request.data)
             query_dict["updated_at"] = datetime.now()
@@ -63,14 +65,8 @@ class CompanyBranchAPIView(APIView):
 
     def delete(self, request, pk):
         try:
-            branch = self.get_branch_by_pk(pk)
+            branch = get_model_by_pk("CompanyBranch", pk)
             branch.delete()
             return Response(data={"message": "branch deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
-
-    def get_branch_by_pk(self, pk):
-        branch = CompanyBranch.objects.filter(pk=pk).first()
-        if not branch:
-            raise Http404("Branch not found")
-        return branch
