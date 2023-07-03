@@ -3,9 +3,11 @@ from rest_framework.test import APITestCase
 
 from employee.models.company_branch_model import CompanyBranch
 from employee.models.company_model import Company
+from employee.models.department_model import Department
 from employee.models.employee_model import Employee
+from employee.models.position_model import Position
 
-from .api_factory import CompanyBranchFactory, CompanyFactory, EmployeeFactory
+from .api_factory import CompanyBranchFactory, CompanyFactory, DepartmentFactory, EmployeeFactory, PositionFactory
 
 
 class TestEmployeeCreation(APITestCase):
@@ -14,13 +16,23 @@ class TestEmployeeCreation(APITestCase):
         super().setUpClass()
         cls.company = CompanyFactory()
         cls.branch = CompanyBranchFactory(company=cls.company)
-        cls.employee = EmployeeFactory(company=cls.company, branch=cls.branch)
+        cls.position = PositionFactory(company=cls.company)
+        cls.department = DepartmentFactory(company=cls.company)
+        cls.employee = EmployeeFactory(
+            company=cls.company, branch=cls.branch, department=cls.department, position=cls.position
+        )
 
     def test_create_company(self):
         self.assertEqual(Company.objects.count(), 1)
 
     def test_create_branch(self):
         self.assertEqual(CompanyBranch.objects.count(), 1)
+
+    def test_create_department(self):
+        self.assertEqual(Department.objects.count(), 1)
+
+    def test_create_position(self):
+        self.assertEqual(Position.objects.count(), 1)
 
     def test_create_employee(self):
         self.assertEqual(Employee.objects.count(), 1)
@@ -84,6 +96,64 @@ class TestEmployeeCreation(APITestCase):
         response = self.client.delete(f"/branches/{self.branch.id}/delete", format="json")
         self.assertEqual(response.status_code, 204)
 
+        #               Department Test Cycle                  #
+
+    def test_list_departments(self):
+        response = self.client.get("/departments/", format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_department(self):
+        response = self.client.get(f"/departments/{self.department.id}", format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_department_api(self):
+        data = {"name": Faker().name(), "company": self.company.id}
+        response = self.client.post("/departments/create", data=data, format="json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_update_department_patch(self):
+        data = {"name": Faker().name()}
+        response = self.client.patch(f"/departments/{self.department.id}/update", data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_department_put(self):
+        data = {"name": Faker().name(), "address": Faker().sentence(), "company": self.company.id}
+        response = self.client.put(f"/departments/{self.department.id}/update", data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_department(self):
+        response = self.client.delete(f"/departments/{self.department.id}/delete", format="json")
+        self.assertEqual(response.status_code, 204)
+
+        #               Position Test Cycle                  #
+
+    def test_list_positions(self):
+        response = self.client.get("/positions/", format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_position(self):
+        response = self.client.get(f"/positions/{self.position.id}", format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_position_api(self):
+        data = {"name": Faker().name(), "company": self.company.id}
+        response = self.client.post("/positions/create", data=data, format="json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_update_position_patch(self):
+        data = {"name": Faker().name()}
+        response = self.client.patch(f"/positions/{self.position.id}/update", data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_position_put(self):
+        data = {"name": Faker().name(), "address": Faker().sentence(), "company": self.company.id}
+        response = self.client.put(f"/positions/{self.position.id}/update", data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_position(self):
+        response = self.client.delete(f"/positions/{self.position.id}/delete", format="json")
+        self.assertEqual(response.status_code, 204)
+
         #               Employee Test Cycle               #
 
     def test_list_employees(self):
@@ -99,8 +169,8 @@ class TestEmployeeCreation(APITestCase):
             "name": Faker().name(),
             "email": Faker().email(),
             "mobile": Faker().random_number(digits=12),
-            "department": "development",
-            "position": "software_engineer",
+            "department": self.department.id,
+            "position": self.position.id,
             "branch": self.branch.id,
             "company": self.company.id,
         }
@@ -117,8 +187,8 @@ class TestEmployeeCreation(APITestCase):
             "name": Faker().name(),
             "email": Faker().email(),
             "mobile": Faker().random_number(digits=12),
-            "department": "development",
-            "position": "software_engineer",
+            "department": self.department.id,
+            "position": self.position.id,
             "branch": self.branch.id,
             "company": self.company.id,
         }

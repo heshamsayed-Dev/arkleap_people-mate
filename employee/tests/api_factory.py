@@ -4,7 +4,9 @@ from faker import Faker
 
 from employee.models.company_branch_model import CompanyBranch
 from employee.models.company_model import Company
+from employee.models.department_model import Department
 from employee.models.employee_model import Employee
+from employee.models.position_model import Position
 
 
 class CompanyFactory(DjangoModelFactory):
@@ -24,6 +26,22 @@ class CompanyBranchFactory(DjangoModelFactory):
     company = factory.SubFactory(CompanyFactory)
 
 
+class DepartmentFactory(DjangoModelFactory):
+    class Meta:
+        model = Department
+
+    name = Faker().name()
+    company = factory.SubFactory(CompanyFactory)
+
+
+class PositionFactory(DjangoModelFactory):
+    class Meta:
+        model = Position
+
+    name = Faker().name()
+    company = factory.SubFactory(CompanyFactory)
+
+
 class EmployeeFactory(DjangoModelFactory):
     class Meta:
         model = Employee
@@ -31,7 +49,7 @@ class EmployeeFactory(DjangoModelFactory):
     name = Faker().name()
     email = Faker().name()
     mobile = Faker().random_number(digits=5)
-    department = "development"
-    position = "software_engineer"
+    department = factory.SubFactory(DepartmentFactory)
+    position = factory.SubFactory(PositionFactory)
     company = factory.SubFactory(CompanyFactory)
     branch = factory.SubFactory(CompanyBranchFactory)
