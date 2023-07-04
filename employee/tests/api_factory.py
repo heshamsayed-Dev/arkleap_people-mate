@@ -6,6 +6,7 @@ from employee.models.company_branch_model import CompanyBranch
 from employee.models.company_model import Company
 from employee.models.department_model import Department
 from employee.models.employee_model import Employee
+from employee.models.location_model import Location
 from employee.models.position_model import Position
 
 
@@ -24,6 +25,16 @@ class CompanyBranchFactory(DjangoModelFactory):
     name = Faker().name()
     address = Faker().sentence()
     company = factory.SubFactory(CompanyFactory)
+
+
+class LocationFactory(DjangoModelFactory):
+    class Meta:
+        model = Location
+
+    longitude = Faker().random.uniform(-180.0, 180.0)
+    latitude = Faker().random.uniform(-90.0, 90.0)
+    status = "current"
+    branch = factory.SubFactory(CompanyBranchFactory)
 
 
 class DepartmentFactory(DjangoModelFactory):
