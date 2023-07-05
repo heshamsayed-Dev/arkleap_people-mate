@@ -1,6 +1,7 @@
 """
 Base settings to build other settings files upon.
 """
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -45,20 +46,18 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-#TODO Create credentails for development and save it in environment variables
+# TODO Create credentails for development and save it in environment variables
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'people_mate',
-        'USER': 'heshamsayed',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': 5432,
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "people_mate",
+        "USER": "heshamsayed",
+        "PASSWORD": "password",
+        "HOST": "localhost",
+        "PORT": 5432,
     }
 }
-
-
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
@@ -83,6 +82,7 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
+    "hello",
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -239,7 +239,7 @@ EMAIL_TIMEOUT = 5
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL.
-ADMIN_URL = "admin/"
+ADMIN_URL = "secure/people_mate_administration/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = [("""Hesham Sayed""", "hesham.sayed@arkleap.com")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
@@ -325,6 +325,7 @@ SOCIALACCOUNT_FORMS = {"signup": "people_mate.users.forms.UserSocialSignupForm"}
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
@@ -345,3 +346,9 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+
+# Access token expiress after 1 hour
+SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(hours=1)}
+
+ADMIN_SITE_HEADER = "People Mate Dashboard"
