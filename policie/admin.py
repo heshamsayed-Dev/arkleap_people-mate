@@ -1,3 +1,5 @@
-# from django.contrib import admin
+from django.contrib import admin
 
-# # Register your models here.
+from .models.policie_model import Policie
+
+admin.site.register(Policie)
