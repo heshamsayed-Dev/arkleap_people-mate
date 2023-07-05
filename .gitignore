@@ -332,3 +332,5 @@ people_mate/media/
 .pytest_cache/
 
 migrations/
+Dockerfile
+config/settings/base.py
