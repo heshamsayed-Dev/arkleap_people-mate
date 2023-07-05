@@ -45,19 +45,28 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-#TODO Create credentails for development and save it in environment variables
+# TODO Create credentails for development and save it in environment variables
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'people_mate',
+#         'USER': 'heshamsayed',
+#         'PASSWORD': 'password',
+#         'HOST': 'localhost',
+#         'PORT': 5432,
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'people_mate',
-        'USER': 'heshamsayed',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': 5432,
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "People_Mate",
+        "USER": "mashreq_sysadmin",
+        "PASSWORD": "M@$hreq123",
+        "HOST": "159.223.119.143",
+        "PORT": 5432,
     }
 }
-
 
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -99,6 +108,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "people_mate.users",
+    "people_mate.policie",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -330,3 +330,5 @@ dump.rdb
 people_mate/media/
 
 .pytest_cache/
+
+migrations/
