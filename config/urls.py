@@ -23,6 +23,8 @@ urlpatterns = [
     path("departments/", include("employee.urls.department_urls")),
     path("locations/", include("employee.urls.location_urls")),
     path("policie/", include("policie.urls.policie_urls")),
+    path("attendances/", include("attendance.urls.attendance_urls")),
+    path("attendance-details/", include("attendance.urls.attendance_detail_urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
