@@ -2,23 +2,13 @@ from datetime import date
 
 from rest_framework import serializers
 
-from ..models.policie_model import Policie
+from ..models.policy_model import policy
 
 
 class PolicieSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Policie
+        model = policy
         fields = "__all__"
-
-    # def create(self, validated_data):
-    #     user = self.context.get('user')
-    #     company =
-    #     policie_obj = Policie(**validated_data)
-    #     policie_obj.company= company
-    #     policie_obj.created_by = user
-    #     policie_obj.created_at = date.today(),
-    #     policie_obj.save()
-    #     return policie_obj
 
     def update(self, instance, validated_data, *args, **kwargs):
         try:

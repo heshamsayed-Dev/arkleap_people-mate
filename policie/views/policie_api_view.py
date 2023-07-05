@@ -6,7 +6,7 @@ from rest_framework import status, viewsets
 # from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models.policie_model import Policie
+from ..models.policy_model import Policie
 from ..serializers.policie_serializer import PolicieSerializer
 
 
