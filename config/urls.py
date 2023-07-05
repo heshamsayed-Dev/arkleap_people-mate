@@ -16,6 +16,8 @@ urlpatterns = [
     # User management
     path("users/", include("people_mate.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    path("attendances/", include("attendance.urls.attendance_urls")),
+    path("attendance-details/", include("attendance.urls.attendance_detail_urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
