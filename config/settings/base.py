@@ -59,6 +59,7 @@ DATABASES = {
     }
 }
 
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -82,8 +83,8 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
-    "hello",
 ]
+
 THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
@@ -97,7 +98,8 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
 ]
 
-LOCAL_APPS = ["people_mate.users", "employee"]
+LOCAL_APPS = ["people_mate.users", "employee", ""]
+
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -237,6 +239,7 @@ EMAIL_TIMEOUT = 5
 # ------------------------------------------------------------------------------
 # Django Admin URL.
 ADMIN_URL = "secure/people_mate_administration/"
+
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = [("""Hesham Sayed""", "hesham.sayed@arkleap.com")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
