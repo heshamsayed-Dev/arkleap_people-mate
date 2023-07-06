@@ -48,13 +48,24 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 
 # TODO Create credentails for development and save it in environment variables
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "people_mate",
+#         "USER": "heshamsayed",
+#         "PASSWORD": "password",
+#         "HOST": "localhost",
+#         "PORT": 5432,
+#     }
+# }
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "people_mate",
-        "USER": "heshamsayed",
-        "PASSWORD": "password",
-        "HOST": "localhost",
+        "NAME": "people_mate_api",
+        "USER": "mashreq_sysadmin",
+        "PASSWORD": "M@$hreq123",
+        "HOST": "159.223.119.143",
         "PORT": 5432,
     }
 }
@@ -97,7 +108,7 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
 ]
 
-LOCAL_APPS = ["people_mate.users", "employee", "attendance", "policie"]
+LOCAL_APPS = ["people_mate.users", "employee", "attendance", "policie", "policy"]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -328,7 +339,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 

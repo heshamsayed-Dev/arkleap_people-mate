@@ -22,7 +22,7 @@ urlpatterns = [
     path("positions/", include("employee.urls.position_urls")),
     path("departments/", include("employee.urls.department_urls")),
     path("locations/", include("employee.urls.location_urls")),
-    path("policie/", include("policie.urls.policie_urls")),
+    path("policy/", include("policy.urls.policy_urls")),
     path("attendances/", include("attendance.urls.attendance_urls")),
     path("attendance-details/", include("attendance.urls.attendance_detail_urls")),
     # Your stuff: custom urls includes go here
