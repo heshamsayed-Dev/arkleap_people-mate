@@ -1,7 +1,5 @@
 from django.db import models
-
 from employee.models.company_model import Company
-
 from .common_model import CommonModel
 
 

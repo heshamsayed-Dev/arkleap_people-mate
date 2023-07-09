@@ -2,6 +2,10 @@ from django.db import models
 
 from config.settings import base
 
+from django.db import models
+
+
+
 
 class CommonModel(models.Model):
     created_by = models.ForeignKey(
@@ -15,3 +19,5 @@ class CommonModel(models.Model):
 
     class Meta:
         abstract = True
+
+

@@ -15,7 +15,6 @@ class policySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context.get("user")
         company = Company.objects.get(id=1)
-
         policy_obj = Policy(**validated_data)
         policy_obj.company = company
         policy_obj.created_by = user

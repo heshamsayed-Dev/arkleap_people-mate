@@ -62,7 +62,7 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "people_mate",
+        "NAME": "PMate",
         "USER": "mashreq_sysadmin",
         "PASSWORD": "M@$hreq123",
         "HOST": "159.223.119.143",
@@ -108,7 +108,7 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
 ]
 
-LOCAL_APPS = ["people_mate.users", "employee", "attendance", "policie", "policy"]
+LOCAL_APPS = ["people_mate.users", "employee", "attendance", "policy"]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -341,6 +341,9 @@ REST_FRAMEWORK = {
     ),
     # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+	'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+	'PAGE_SIZE': 2,
+
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
