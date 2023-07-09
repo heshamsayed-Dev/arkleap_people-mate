@@ -62,7 +62,7 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "people_mate_api",
+        "NAME": "people_mate",
         "USER": "mashreq_sysadmin",
         "PASSWORD": "M@$hreq123",
         "HOST": "159.223.119.143",
@@ -362,3 +362,10 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(hours=1)}
 
 ADMIN_SITE_HEADER = "People Mate Dashboard"
+
+TIME_ZONE = "Africa/Cairo"
+
+USE_I18N = True
+
+
+USE_TZ = True

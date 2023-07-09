@@ -8,5 +8,5 @@ class PolicyFactory(DjangoModelFactory):
     class Meta:
         model = Policy
 
-    name = Faker().name()
+    working_hours = Faker().name()
     address = Faker().sentence()
