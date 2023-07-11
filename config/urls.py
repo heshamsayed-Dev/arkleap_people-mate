@@ -7,7 +7,7 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt import views as jwt_views
-
+from people_mate.users.api.views import UserViewSet
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
@@ -22,9 +22,9 @@ urlpatterns = [
     path("positions/", include("employee.urls.position_urls")),
     path("departments/", include("employee.urls.department_urls")),
     path("locations/", include("employee.urls.location_urls")),
-    path("policie/", include("policie.urls.policie_urls")),
     path("attendances/", include("attendance.urls.attendance_urls")),
     path("attendance-details/", include("attendance.urls.attendance_detail_urls")),
+    
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
@@ -44,6 +44,8 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
+    path('api/signup', UserViewSet.as_view({'post': 'signup'}),name='signup'),
+    path('api/signout', UserViewSet.as_view({'get': 'signout'}),name='signout'),
 ]
 
 if settings.DEBUG:
@@ -73,4 +75,4 @@ if settings.DEBUG:
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
 
 
-admin.site.site_header = settings.ADMIN_SITE_HEADER
+# admin.site.site_header = settings.ADMIN_SITE_HEADER

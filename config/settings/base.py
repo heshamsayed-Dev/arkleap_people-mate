@@ -1,7 +1,6 @@
 """
 Base settings to build other settings files upon.
 """
-from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -46,18 +45,20 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-# TODO Create credentails for development and save it in environment variables
+#TODO Create credentails for development and save it in environment variables
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "people_mate",
-        "USER": "heshamsayed",
-        "PASSWORD": "password",
-        "HOST": "localhost",
-        "PORT": 5432,
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'people_mate',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'psql_people_m8',
+        'PORT': 5432,
     }
 }
+
+
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
@@ -82,8 +83,8 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
+    'rest_framework_simplejwt',
 ]
-
 THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
@@ -95,10 +96,14 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
+    
 ]
 
-LOCAL_APPS = ["people_mate.users", "employee", "attendance", "policie"]
-
+LOCAL_APPS = [
+    "people_mate.users",
+    "employee",
+    "attendance",
+]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -237,8 +242,7 @@ EMAIL_TIMEOUT = 5
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL.
-ADMIN_URL = "secure/people_mate_administration/"
-
+ADMIN_URL = "admin/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = [("""Hesham Sayed""", "hesham.sayed@arkleap.com")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
@@ -322,15 +326,21 @@ SOCIALACCOUNT_FORMS = {"signup": "people_mate.users.forms.UserSocialSignupForm"}
 # django-rest-framework
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
@@ -345,9 +355,3 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
-
-
-# Access token expiress after 1 hour
-SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(hours=1)}
-
-ADMIN_SITE_HEADER = "People Mate Dashboard"

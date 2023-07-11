@@ -2,9 +2,8 @@ from django.db import models
 
 from .company_branch_model import CompanyBranch
 
-
+status_choices = (("current", "Current"), ("expired", "Expired"))
 class Location(models.Model):
-    status_choices = (("current", "Current"), ("expired", "Expired"))
     latitude = models.FloatField()
     longitude = models.FloatField()
     status = models.CharField(max_length=15, choices=status_choices)

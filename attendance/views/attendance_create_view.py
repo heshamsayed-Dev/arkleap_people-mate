@@ -7,7 +7,7 @@ from attendance.serializers.attendance_serializer import AttendanceSerializer
 
 class AttendanceCreateView(APIView):
     def post(self, request):
-        serializer = AttendanceSerializer(data=request.data)
+        serializer = AttendanceSerializer(data=request.data,context={'request':request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

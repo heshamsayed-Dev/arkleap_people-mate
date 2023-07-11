@@ -333,4 +333,4 @@ people_mate/media/
 
 migrations/
 Dockerfile
-config/settings/base.py
+

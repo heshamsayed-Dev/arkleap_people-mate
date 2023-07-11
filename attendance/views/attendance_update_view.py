@@ -17,7 +17,7 @@ class AttendanceUpdateView(APIView):
             query_dict = QueryDict("", mutable=True)
             query_dict.update(request.data)
             query_dict["updated_at"] = datetime.now()
-            serializer = AttendanceSerializer(attendance, data=query_dict)
+            serializer = AttendanceSerializer(attendance, data=query_dict,context={"id":pk,'request':request})
 
             if serializer.is_valid():
                 serializer.save()
@@ -33,7 +33,7 @@ class AttendanceUpdateView(APIView):
             query_dict = QueryDict("", mutable=True)
             query_dict.update(request.data)
             query_dict["updated_at"] = datetime.now()
-            serializer = AttendanceSerializer(attendance, data=query_dict, partial=True)
+            serializer = AttendanceSerializer(attendance, data=query_dict, partial=True,context={"id":pk,'request':request})
 
             if serializer.is_valid():
                 serializer.save()
