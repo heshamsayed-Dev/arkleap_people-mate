@@ -1,7 +1,6 @@
 import factory
 from factory.django import DjangoModelFactory
 from faker import Faker
-
 from employee.models.company_branch_model import CompanyBranch
 from employee.models.company_model import Company
 from employee.models.department_model import Department

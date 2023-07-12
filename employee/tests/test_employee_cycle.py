@@ -29,7 +29,7 @@ class TestEmployeeCreation(APITestCase):
         cls.user=UserFactory()
         cls.company = CompanyFactory()
         cls.branch = CompanyBranchFactory(company=cls.company)
-        cls.location = LocationFactory(branch=cls.branch)
+        cls.location  = LocationFactory(branch=cls.branch)
         cls.position = PositionFactory(company=cls.company)
         cls.department = DepartmentFactory(company=cls.company)
 
