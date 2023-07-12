@@ -25,15 +25,6 @@ class AttendanceSerializer(serializers.ModelSerializer):
     # return attendance
 
     # def update(self, instance, validated_data):
-    #     print('from update function inside the serializer')
-    #     attachments_data = validated_data.pop('attachments', [])
-    #     if attachments_data:
-    #         for attachment_data in attachments_data:
-    #             attachment = BugAttachment.objects.create(bug=instance, **attachment_data)
-
-    #     if validated_data:
-    #         for field , value in validated_data.items():
-    #             setattr(instance, field, value)
 
     #     instance.save()
     #     return instance

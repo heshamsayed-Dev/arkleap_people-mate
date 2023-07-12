@@ -320,8 +320,6 @@ ACCOUNT_FORMS = {"signup": "people_mate.users.forms.UserSignupForm"}
 SOCIALACCOUNT_ADAPTER = "people_mate.users.adapters.SocialAccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 SOCIALACCOUNT_FORMS = {"signup": "people_mate.users.forms.UserSocialSignupForm"}
-
-
 # django-rest-framework
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/

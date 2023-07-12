@@ -1,12 +1,11 @@
 from datetime import datetime
 
-from celery import shared_task
-
 from attendance.models.attendance_model import Attendance
 from attendance.views.utils import calculate_checkout_time, calculate_worked_hours
+from config.celery_app import app
 
 
-@shared_task
+@app.task
 def calculate_attendance_task():
     returned_atts = []
     attendances = Attendance.objects.prefetch_related("attendance_details").get(status="open")
@@ -28,5 +27,4 @@ def calculate_attendance_task():
             att.status = "closed"
             att.worked_hours = calculate_worked_hours(att.attendance_details)
             att.save()
-
     return returned_atts
