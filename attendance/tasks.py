@@ -1,15 +1,32 @@
-from celery.schedules import crontab
-from attendance.views.attendance_calculate_view import calculate_attendance
-from attendance.views.utils import calculate_attendances_daily
-@app.task
-def calculate_attendance_task():
-    calculate_attendances_daily()
-    
+from datetime import datetime
 
-# Schedule the task to run at 23:50 every day
-app.conf.beat_schedule = {
-    'calculate_attendance': {
-        'task': 'attendance.tasks.calculate_attendance_task',
-        'schedule': crontab(minute=45, hour=23),
-    },
-}
+from celery import shared_task
+
+from attendance.models.attendance_model import Attendance
+from attendance.views.utils import calculate_checkout_time, calculate_worked_hours
+
+
+@shared_task
+def calculate_attendance_task():
+    returned_atts = []
+    attendances = Attendance.objects.prefetch_related("attendance_details").get(status="open")
+    for att in attendances:
+        detail_hasnt_check_out = att.attendance_details.filter(check_out=None).first()
+        if (not att.check_out) and detail_hasnt_check_out:
+            returned_atts.append(att)
+
+        elif att.shift_start_time > att.shift_end_time and att.date == datetime.today().date():
+            pass
+
+        else:
+            if att.check_out and detail_hasnt_check_out:
+                detail_hasnt_check_out.check_out = att.check_out
+                detail_hasnt_check_out.save()
+            else:
+                att.check_out = calculate_checkout_time(att.attendance_details)
+
+            att.status = "closed"
+            att.worked_hours = calculate_worked_hours(att.attendance_details)
+            att.save()
+
+    return returned_atts

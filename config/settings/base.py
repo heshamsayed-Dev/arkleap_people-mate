@@ -45,19 +45,18 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-#TODO Create credentails for development and save it in environment variables
+# TODO Create credentails for development and save it in environment variables
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'people_mate',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'psql_people_m8',
-        'PORT': 5432,
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "people_mate",
+        "USER": "user",
+        "PASSWORD": "password",
+        "HOST": "psql_people_m8",
+        "PORT": 5432,
     }
 }
-
 
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
@@ -83,7 +82,7 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
-    'rest_framework_simplejwt',
+    "rest_framework_simplejwt",
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -96,7 +95,6 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
-    
 ]
 
 LOCAL_APPS = [
@@ -323,19 +321,20 @@ SOCIALACCOUNT_ADAPTER = "people_mate.users.adapters.SocialAccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 SOCIALACCOUNT_FORMS = {"signup": "people_mate.users.forms.UserSocialSignupForm"}
 
+
 # django-rest-framework
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
 
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
