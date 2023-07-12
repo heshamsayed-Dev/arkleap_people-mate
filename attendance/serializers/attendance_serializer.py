@@ -24,10 +24,14 @@ class AttendanceSerializer(serializers.ModelSerializer):
     #     )
     # return attendance
 
-    # def update(self, instance, validated_data):
-
-    #     instance.save()
-    #     return instance
+    def update(self, instance, validated_data):
+        check_in = validated_data.get("check_in", getattr(self.instance, "check_in", None))
+        check_out = validated_data.get("check_out", getattr(self.instance, "check_out", None))
+        # here will check for date if changed will seek for new shift start time and end time
+        if validated_data["check_in"] or validated_data["check_out"]:
+            instance.worked_hours = check_out - check_in
+        instance.save()
+        return instance
 
     def validate(self, data):
         check_in = data.get("check_in", getattr(self.instance, "check_in", None))
