@@ -2,9 +2,19 @@ from datetime import date
 
 from rest_framework import serializers
 
-from employee.models.company_model import Company
+from employee.models.employee_model import Employee
 
 from ..models.policy_model import Policy
+
+
+def get_company(user):
+    try:
+        employee = Employee.objects.get(user=user)
+    except Employee.DoesNotExist:
+        raise serializers.ValidationError(detail={"this user have no employee, please connect to admin"})
+    except Employee.MultipleObjectsReturned:
+        employee = Employee.objects.filter(user=user).last()
+    return employee.company
 
 
 class policySerializer(serializers.ModelSerializer):
@@ -14,7 +24,8 @@ class policySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context.get("user")
-        company = Company.objects.get(id=1)
+        company = get_company(user)
+        company = company
         policy_obj = Policy(**validated_data)
         policy_obj.company = company
         policy_obj.created_by = user
@@ -25,6 +36,8 @@ class policySerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data, *args, **kwargs):
         try:
             user = self.context.get("user")
+            company = get_company(user)
+            company = company
             instance.last_update_date = date.today()
             instance.last_update_by = user
             instance.working_hours = validated_data.get("working_hours", instance.working_hours)

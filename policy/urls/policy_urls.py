@@ -1,6 +1,5 @@
 from rest_framework.routers import DefaultRouter
 
-# from ..views.policy_api_view import PolicyViewSet
 from policy.views.policy_api_view import PolicyViewSet
 
 app_name = "policy"
