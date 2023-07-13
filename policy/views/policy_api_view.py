@@ -4,15 +4,14 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-# from people_mate.users.models import User
 from ..models.policy_model import Policy
-from ..serializers.policy_serializer import policyserializer
+from ..serializers.policy_serializer import policySerializer
 
 
 class PolicyViewSet(viewsets.ViewSet):
     queryset = Policy.objects.all()
     model = Policy
-    serializer_class = policyserializer
+    serializer_class = policySerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
 
