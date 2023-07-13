@@ -48,13 +48,25 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 
 # TODO Create credentails for development and save it in environment variables
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "people_mate",
+#         "USER": "heshamsayed",
+#         "PASSWORD": "password",
+#         "HOST": "localhost",
+#         "PORT": 5432,
+#     }
+# }
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "people_mate",
-        "USER": "heshamsayed",
-        "PASSWORD": "password",
-        "HOST": "localhost",
+        "NAME": "PMate",
+        "USER": "mashreq_sysadmin",
+        "PASSWORD": "M@$hreq123",
+        "HOST": "159.223.119.143",
         "PORT": 5432,
     }
 }
@@ -337,7 +349,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 2,

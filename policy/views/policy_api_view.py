@@ -1,8 +1,7 @@
 # from datetime import datetime
 from rest_framework import status, viewsets
 from rest_framework.pagination import LimitOffsetPagination
-
-# from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 # from people_mate.users.models import User
@@ -15,8 +14,7 @@ class PolicyViewSet(viewsets.ViewSet):
     model = Policy
     serializer_class = policySerializer
     pagination_class = LimitOffsetPagination
-
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def list(self, request):
         # queryset = self.queryset.order_by("-created_at")
