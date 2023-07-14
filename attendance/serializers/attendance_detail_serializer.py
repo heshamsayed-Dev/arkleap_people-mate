@@ -21,6 +21,8 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
         try:
             if not employee.branch:
                 raise ValueError("this employee has no branch please set him a branch first")
+            if not employee.policy:
+                raise ValueError("this employee has no working policy please set him a one first")
 
             attendances = Attendance.objects.filter(
                 date__range=[check_in.date() - datetime.timedelta(days=1), check_in.date()],
@@ -38,31 +40,20 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
                     attendance = attendances[0]
 
                 else:
-                    # converting shift start time from float to datetime
-                    shift_start_hours = int(attendances[0].shift_start_time)
-                    shift_start_minutes = int((attendances[0].shift_start_time - shift_start_hours) * 60)
-                    shift_start_time = timedelta(hours=shift_start_hours, minutes=shift_start_minutes)
-                    shift_start_datetime = (
-                        datetime.datetime.combine(attendances[0].date, datetime.datetime.min.time()) + shift_start_time
+                    shift_start_datetime = datetime.datetime.combine(
+                        attendances[0].date, attendances[0].shift_start_time
                     )
-
-                    # converting shift end time from float to datetime
-                    shift_end_hours = int(attendances[0].shift_end_time)
-                    shift_end_minutes = int((attendances[0].shift_end_time - shift_end_hours) * 60)
-                    shift_end_time = timedelta(hours=shift_end_hours, minutes=shift_end_minutes)
 
                     # case that shift from night to next day morning
                     if attendances[0].shift_start_time > attendances[0].shift_end_time:
-                        shift_end_datetime = (
-                            datetime.datetime.combine(
-                                attendances[0].date + timedelta(days=1), datetime.datetime.min.time()
-                            )
-                            + shift_end_time
+                        shift_end_datetime = datetime.datetime.combine(
+                            attendances[0].date + timedelta(days=1),
+                            attendances[0].shift_end_time,
                         )
                     else:
                         shift_end_datetime = (
-                            datetime.datetime.combine(attendances[0].date, datetime.datetime.min.time())
-                            + shift_end_time
+                            attendances[0].date + timedelta(days=1),
+                            attendances[0].shift_end_time,
                         )
 
                     if (
@@ -76,7 +67,13 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
 
         except Attendance.DoesNotExist:
             attendance = Attendance.objects.create(
-                date=check_in.date(), employee=employee, check_in=check_in, status="open"
+                date=check_in.date(),
+                employee=employee,
+                check_in=check_in,
+                status="open",
+                shift_start_time=employee.policy.working_policy_start_date,
+                shift_end_time=employee.policy.working_policy_end_date,
+                creation_method="automatic",
             )
         return attendance
 
@@ -96,8 +93,6 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
             attendance=attendance, **validated_data, branch=attendance.employee.branch
         )
         return attendance_detail
-
-    # def update(self,instance,)
 
     def validate(self, data):
         check_in = data.get("check_in", getattr(self.instance, "check_in", None))
