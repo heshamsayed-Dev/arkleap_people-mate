@@ -1,8 +1,8 @@
 import datetime
-from datetime import timedelta
 
 from rest_framework.test import APITestCase
 
+from attendance.constants import STATUS_CLOSED
 from attendance.models.attendance_detail_model import AttendanceDetail
 from attendance.models.attendance_model import Attendance
 from employee.models.company_branch_model import CompanyBranch
@@ -91,7 +91,7 @@ class TestAttendanceCreation(APITestCase):
             "check_in": datetime.datetime.now(),
             "date": datetime.datetime.today().date(),
             "check_out": datetime.datetime.now() + datetime.timedelta(hours=7),
-            "status": "closed",
+            "status": STATUS_CLOSED,
         }
         response = self.client.post("/attendances/create", data=data, format="json")
         self.assertEqual(response.status_code, 201)
@@ -111,7 +111,7 @@ class TestAttendanceCreation(APITestCase):
             "employee": self.employee.id,
             "shift_start_time": 9.30,
             "shift_end_time": 15.30,
-            "status": "closed",
+            "status": STATUS_CLOSED,
         }
         response = self.client.put(f"/attendances/{self.attendance.id}/update", data=data, format="json")
         self.assertEqual(response.status_code, 200)

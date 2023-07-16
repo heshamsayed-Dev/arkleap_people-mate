@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employee.constants import STATUS_CURRENT, STATUS_EXPIRED
 from employee.models.company_branch_model import CompanyBranch
 from employee.serializers.location_serializer import LocationSerializer
 
@@ -14,8 +15,8 @@ from .utils import get_model_by_pk
 class LocationUpdateView(APIView):
     def check_branch_locations_with_current_status(self, branch_id, location_id):
         branch = CompanyBranch.objects.prefetch_related("locations").get(id=branch_id)
-        if branch.locations.filter(status="current").exists():
-            current_location = branch.locations.filter(status="current").first()
+        if branch.locations.filter(status=STATUS_CURRENT).exists():
+            current_location = branch.locations.filter(status=STATUS_CURRENT).first()
             return current_location
         else:
             return None
@@ -30,11 +31,11 @@ class LocationUpdateView(APIView):
             serializer = LocationSerializer(location, data=query_dict)
 
             if serializer.is_valid():
-                if data["status"] == "current":
+                if data["status"] == STATUS_CURRENT:
                     current_location = self.check_branch_locations_with_current_status(data["branch"], pk)
                     if current_location:
                         if current_location.id != pk:
-                            current_location.status = "expired"
+                            current_location.status = STATUS_EXPIRED
                             current_location.updated_at = datetime.now()
                             current_location.save()
 
@@ -55,7 +56,7 @@ class LocationUpdateView(APIView):
             serializer = LocationSerializer(location, data=query_dict, partial=True)
 
             if serializer.is_valid():
-                if data.get("status") and data.get("status") == "current":
+                if data.get("status") and data.get("status") == STATUS_CURRENT:
                     if data.get("branch"):
                         current_location = self.check_branch_locations_with_current_status(data["branch"], pk)
                     else:
@@ -63,7 +64,7 @@ class LocationUpdateView(APIView):
 
                     if current_location:
                         if current_location.id != pk:
-                            current_location.status = "expired"
+                            current_location.status = STATUS_EXPIRED
                             current_location.updated_at = datetime.now()
                             current_location.save()
                 serializer.save()

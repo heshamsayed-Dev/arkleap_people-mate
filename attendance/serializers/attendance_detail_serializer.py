@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from rest_framework import serializers
 
+from attendance.constants import STATUS_OPEN
 from attendance.models.attendance_detail_model import AttendanceDetail
 from attendance.models.attendance_model import Attendance
 
@@ -17,65 +18,44 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
             "attendance": {"read_only": True},
         }
 
-    def get_or_create_parent_attendance(self, check_in, employee):
-        try:
-            if not employee.branch:
-                raise ValueError("this employee has no branch please set him a branch first")
-            if not employee.policy:
-                raise ValueError("this employee has no working policy please set him a one first")
+    def check_right_attendance_date(self, check_in, employee):
+        shift_start_datetime = datetime.datetime.combine(check_in.date(), employee.policy.working_policy_start_date)
+        shift_end_datetime = shift_start_datetime + timedelta(hours=employee.policy.working_hours)
+        if (
+            shift_start_datetime - timedelta(hours=6)
+            < check_in.replace(tzinfo=None)
+            < shift_end_datetime + timedelta(hours=6)
+        ):
+            return check_in.date()
+        else:
+            return check_in.date() - timedelta(days=1)
 
-            attendances = Attendance.objects.filter(
-                date__range=[check_in.date() - datetime.timedelta(days=1), check_in.date()],
-                employee=employee,
-                status="open",
-            )
-
-            if not attendances:
-                raise Attendance.DoesNotExist()
-            if attendances.count() == 2:
-                attendance = attendances.get(date=check_in.date())
-
-            else:
-                if attendances[0].date == check_in.date():
-                    attendance = attendances[0]
-
-                else:
-                    shift_start_datetime = datetime.datetime.combine(
-                        attendances[0].date, attendances[0].shift_start_time
-                    )
-
-                    # case that shift from night to next day morning
-                    if attendances[0].shift_start_time > attendances[0].shift_end_time:
-                        shift_end_datetime = datetime.datetime.combine(
-                            attendances[0].date + timedelta(days=1),
-                            attendances[0].shift_end_time,
-                        )
-                    else:
-                        shift_end_datetime = (
-                            attendances[0].date + timedelta(days=1),
-                            attendances[0].shift_end_time,
-                        )
-
-                    if (
-                        shift_start_datetime
-                        <= check_in.replace(tzinfo=None)
-                        <= shift_end_datetime + timedelta(hours=5)
-                    ):
-                        attendance = attendances[0]
-                    else:
-                        raise Attendance.DoesNotExist()
-
-        except Attendance.DoesNotExist:
-            attendance = Attendance.objects.create(
-                date=check_in.date(),
-                employee=employee,
-                check_in=check_in,
-                status="open",
-                shift_start_time=employee.policy.working_policy_start_date,
-                shift_end_time=employee.policy.working_policy_end_date,
-                creation_method="automatic",
-            )
+    def create_attendance(self, date, employee, check_in):
+        attendance = Attendance.objects.create(
+            date=date,
+            employee=employee,
+            check_in=check_in,
+            status=STATUS_OPEN,
+            shift_start_time=employee.policy.working_policy_start_date,
+            shift_end_time=employee.policy.working_policy_end_date,
+        )
         return attendance
+
+    def get_or_create_parent_attendance(self, check_in, employee):
+        if not employee.branch:
+            raise ValueError("this employee has no branch please set him a branch first")
+        if not employee.policy:
+            raise ValueError("this employee has no working policy please set him a one first")
+
+        right_date = self.check_right_attendance_date(check_in, employee)
+        attendance = Attendance.objects.filter(
+            date=right_date,
+            employee=employee,
+        ).first()
+        if attendance:
+            return attendance
+        else:
+            return self.create_attendance(right_date, employee, check_in)
 
     def create(self, validated_data):
         employee = self.context.get("employee")
@@ -94,6 +74,45 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
         )
         return attendance_detail
 
+    def update(self, instance, validated_data):
+        attendance = instance.attendance
+        attendance_details = attendance.attendance_details.exclude(id=instance.id)
+        if validated_data.get("check_in"):
+            if attendance_details.filter(
+                check_in__lte=validated_data.get("check_in"), check_out__gte=validated_data.get("check_in")
+            ).exists():
+                raise serializers.ValidationError("the date you entered is within another transaction ")
+            instance.check_in = validated_data.get("check_in")
+            if instance.check_in == attendance.check_in:
+                attendance.check_in = validated_data.get("check_in")
+            elif validated_data.get("check_in") < attendance.check_in:
+                attendance.check_in = validated_data.get("check_in")
+
+        if validated_data.get("check_out"):
+            check_in = validated_data.get("check_in", getattr(self.instance, "check_in", None))
+            if attendance_details.filter(
+                check_in__lte=validated_data.get("check_out"), check_out__gte=validated_data.get("check_out")
+            ).exists():
+                raise serializers.ValidationError("the date you entered is within another transaction ")
+            if attendance_details.filter(
+                check_out__lte=validated_data.get("check_out"), check_in__gte=check_in
+            ).exists():
+                raise serializers.ValidationError("there is a complete transaction between this transaction dates  ")
+            instance.check_out = validated_data.get("check_out")
+            if attendance.check_out:
+                if instance.check_out == attendance.check_out:
+                    check_out = validated_data.get("check_out")
+                    for detail in attendance_details:
+                        if detail.check_out > check_out:
+                            check_out = detail.check_out
+
+                    attendance.check_out = check_out
+
+        instance.save()
+        attendance.status = STATUS_OPEN
+        attendance.save()
+        return instance
+
     def validate(self, data):
         check_in = data.get("check_in", getattr(self.instance, "check_in", None))
         check_out = data.get("check_out", getattr(self.instance, "check_out", None))
@@ -102,12 +121,6 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
 
         if check_out and check_in and check_out > (check_in + timedelta(hours=24)):
             raise serializers.ValidationError("The check_out date cant be after 1 day of its check_in .")
-
-        att = Attendance.objects.filter(date=check_in.date(), status="closed").first()
-        if att:
-            raise serializers.ValidationError(
-                "you cant create or edit any transaction for this date it's attendance is already closed ."
-            )
 
         return data
 
