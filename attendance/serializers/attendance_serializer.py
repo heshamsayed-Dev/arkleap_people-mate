@@ -32,13 +32,12 @@ class AttendanceSerializer(serializers.ModelSerializer):
         check_out = validated_data.get("check_out", getattr(self.instance, "check_out", None))
         # here will check for date if changed will seek for new shift start time and end time
         # when added inside working policy
-        if validated_data["check_in"] or validated_data["check_out"]:
-            instance.worked_hours = check_out - check_in
-        if validated_data["employee"] and validated_data["employee"] != instance.employee.id:
-            employee = Employee.objects.get(id=validated_data["employee"])
+        if validated_data.get("check_in") or validated_data.get("check_out"):
+            instance.worked_hours = (check_out - check_in).total_seconds() / 3600
+        if validated_data.get("employee") and validated_data["employee"] != instance.employee.id:
+            employee = Employee.objects.get(id=validated_data["employee"].id)
             instance.shift_start_time = employee.policy.working_policy_start_date
             instance.shift_end_time = employee.policy.working_policy_end_date
-
         instance.save()
         return instance
 

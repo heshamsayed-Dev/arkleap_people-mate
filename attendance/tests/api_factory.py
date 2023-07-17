@@ -1,26 +1,29 @@
+from datetime import datetime
+
 import factory
+from django.contrib.auth.hashers import make_password
 from factory.django import DjangoModelFactory
 from faker import Faker
-from attendance.models.attendance_model import Attendance
+
 from attendance.models.attendance_detail_model import AttendanceDetail
-from employee.models.employee_model import Employee
+from attendance.models.attendance_model import Attendance
 from employee.models.company_branch_model import CompanyBranch
 from employee.models.company_model import Company
+from employee.models.department_model import Department
+from employee.models.employee_model import Employee
 from employee.models.location_model import Location
 from employee.models.position_model import Position
-from employee.models.department_model import Department
 from people_mate.users.models import User
-from django.contrib.auth.hashers import make_password
+from policy.models.policy_model import Policy
 
-from datetime import datetime
 
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
 
     username = Faker().name()
-    password = make_password('123')
-    is_active=True
+    password = make_password("123")
+    is_active = True
 
 
 class CompanyFactory(DjangoModelFactory):
@@ -49,6 +52,17 @@ class LocationFactory(DjangoModelFactory):
     status = "current"
     branch = factory.SubFactory(CompanyBranchFactory)
 
+
+class PolicyFactory(DjangoModelFactory):
+    class Meta:
+        model = Policy
+
+    company = factory.SubFactory(CompanyFactory)
+    working_hours = 8
+    working_policy_start_date = Faker().time("10")
+    working_policy_end_date = Faker().time("18")
+
+
 class DepartmentFactory(DjangoModelFactory):
     class Meta:
         model = Department
@@ -62,7 +76,8 @@ class PositionFactory(DjangoModelFactory):
         model = Position
 
     name = Faker().name()
-    company = factory.SubFactory(CompanyFactory)    
+    company = factory.SubFactory(CompanyFactory)
+
 
 class EmployeeFactory(DjangoModelFactory):
     class Meta:
@@ -75,25 +90,24 @@ class EmployeeFactory(DjangoModelFactory):
     position = factory.SubFactory(PositionFactory)
     company = factory.SubFactory(CompanyFactory)
     branch = factory.SubFactory(CompanyBranchFactory)
-    user=factory.SubFactory(UserFactory)
+    user = factory.SubFactory(UserFactory)
 
 
 class AttendanceFactory(DjangoModelFactory):
     class Meta:
         model = Attendance
+
     employee = factory.SubFactory(EmployeeFactory)
-    check_in=datetime(2023, 5, 9, 7, 30, 0, 123456)
-    date=check_in.date()
+    check_in = datetime(2023, 5, 9, 7, 30, 0, 123456)
+    date = check_in.date()
     check_out = datetime(2023, 5, 9, 15, 30, 0, 123456)
+
 
 class AttendanceDetailFactory(DjangoModelFactory):
     class Meta:
         model = AttendanceDetail
-    branch=factory.SubFactory(CompanyBranchFactory)
-    attendance=factory.SubFactory(AttendanceFactory)
-    check_in=datetime(2023, 5, 9, 7, 30, 0, 123456)
-    check_out = datetime(2023, 5, 9,15 , 30, 0, 123456)
 
-
-
-
+    branch = factory.SubFactory(CompanyBranchFactory)
+    attendance = factory.SubFactory(AttendanceFactory)
+    check_in = datetime(2023, 5, 9, 7, 30, 0, 123456)
+    check_out = datetime(2023, 5, 9, 15, 30, 0, 123456)

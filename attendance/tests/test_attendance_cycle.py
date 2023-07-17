@@ -12,6 +12,7 @@ from employee.models.employee_model import Employee
 from employee.models.location_model import Location
 from employee.models.position_model import Position
 from employee.tests.utils import set_authentication_token
+from policy.models.policy_model import Policy
 
 from .api_factory import (
     AttendanceDetailFactory,
@@ -21,6 +22,7 @@ from .api_factory import (
     DepartmentFactory,
     EmployeeFactory,
     LocationFactory,
+    PolicyFactory,
     PositionFactory,
     UserFactory,
 )
@@ -36,8 +38,14 @@ class TestAttendanceCreation(APITestCase):
         cls.location = LocationFactory(branch=cls.branch)
         cls.position = PositionFactory(company=cls.company)
         cls.department = DepartmentFactory(company=cls.company)
+        cls.policy = PolicyFactory(company=cls.company)
         cls.employee = EmployeeFactory(
-            company=cls.company, branch=cls.branch, department=cls.department, position=cls.position, user=cls.user
+            company=cls.company,
+            branch=cls.branch,
+            department=cls.department,
+            position=cls.position,
+            user=cls.user,
+            policy=cls.policy,
         )
         cls.attendance = AttendanceFactory(employee=cls.employee)
         cls.attendance_detail = AttendanceDetailFactory(branch=cls.branch, attendance=cls.attendance)
@@ -56,6 +64,9 @@ class TestAttendanceCreation(APITestCase):
 
     def test_create_position(self):
         self.assertEqual(Position.objects.count(), 1)
+
+    def test_create_policy(self):
+        self.assertEqual(Policy.objects.count(), 1)
 
     def test_create_employee(self):
         self.assertEqual(Employee.objects.count(), 1)
@@ -105,12 +116,10 @@ class TestAttendanceCreation(APITestCase):
     def test_update_attendance_put(self):
         set_authentication_token(self)
         data = {
+            "employee": self.employee.id,
             "check_in": datetime.datetime(2023, 5, 10, 9, 30, 0, 123456),
             "date": datetime.datetime(2023, 5, 10, 9, 30, 0, 123456).date(),
             "check_out": datetime.datetime(2023, 5, 10, 15, 30, 0, 123456),
-            "employee": self.employee.id,
-            "shift_start_time": 9.30,
-            "shift_end_time": 15.30,
             "status": STATUS_CLOSED,
         }
         response = self.client.put(f"/attendances/{self.attendance.id}/update", data=data, format="json")
@@ -137,8 +146,8 @@ class TestAttendanceCreation(APITestCase):
         set_authentication_token(self)
         data = {
             "branch": self.branch.id,
-            "check_in": datetime.datetime(2023, 5, 9, 7, 30, 0, 123456),
-            "check_out": datetime.datetime(2023, 5, 9, 10, 30, 0, 123456),
+            "check_in": datetime.datetime(2023, 5, 9, 6, 40, 0, 123456),
+            "check_out": datetime.datetime(2023, 5, 9, 7, 15, 0, 123456),
         }
         response = self.client.post("/attendance-details/create", data=data, format="json")
         self.assertEqual(response.status_code, 201)
@@ -156,7 +165,7 @@ class TestAttendanceCreation(APITestCase):
         data = {
             "branch": self.branch.id,
             "check_in": datetime.datetime(2023, 5, 9, 9, 30, 0, 123456),
-            "check_out": datetime.datetime(2023, 5, 9, 15, 30, 0, 123456),
+            "check_out": datetime.datetime(2023, 5, 9, 15, 35, 0, 123456),
         }
         response = self.client.put(f"/attendance-details/{self.attendance_detail.id}/update", data=data, format="json")
         self.assertEqual(response.status_code, 200)

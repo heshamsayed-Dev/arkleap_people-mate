@@ -9,6 +9,7 @@ from employee.models.employee_model import Employee
 from employee.models.location_model import Location
 from employee.models.position_model import Position
 from people_mate.users.models import User
+from policy.models.policy_model import Policy
 
 from .api_factory import (
     CompanyBranchFactory,
@@ -16,6 +17,7 @@ from .api_factory import (
     DepartmentFactory,
     EmployeeFactory,
     LocationFactory,
+    PolicyFactory,
     PositionFactory,
     UserFactory,
 )
@@ -34,9 +36,15 @@ class TestEmployeeCreation(APITestCase):
         cls.location = LocationFactory(branch=cls.branch)
         cls.position = PositionFactory(company=cls.company)
         cls.department = DepartmentFactory(company=cls.company)
+        cls.policy = PolicyFactory(company=cls.company)
 
         cls.employee = EmployeeFactory(
-            company=cls.company, branch=cls.branch, department=cls.department, position=cls.position, user=cls.user
+            company=cls.company,
+            branch=cls.branch,
+            department=cls.department,
+            position=cls.position,
+            user=cls.user,
+            policy=cls.policy,
         )
 
     def test_create_user(self):
@@ -56,6 +64,9 @@ class TestEmployeeCreation(APITestCase):
 
     def test_create_position(self):
         self.assertEqual(Position.objects.count(), 1)
+
+    def test_create_policy(self):
+        self.assertEqual(Policy.objects.count(), 1)
 
     def test_create_employee(self):
         self.assertEqual(Employee.objects.count(), 1)
@@ -269,6 +280,7 @@ class TestEmployeeCreation(APITestCase):
             "position": self.position.id,
             "branch": self.branch.id,
             "company": self.company.id,
+            "policy": self.policy.id,
             "user": user.id,
         }
         response = self.client.post("/employees/create", data=data, format="json")
@@ -290,6 +302,7 @@ class TestEmployeeCreation(APITestCase):
             "position": self.position.id,
             "branch": self.branch.id,
             "company": self.company.id,
+            "policy": self.policy.id,
             "user": self.user.id,
         }
         response = self.client.put(f"/employees/{self.employee.id}/update", data=data, format="json")

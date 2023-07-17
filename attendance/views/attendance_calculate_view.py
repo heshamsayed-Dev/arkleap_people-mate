@@ -15,21 +15,18 @@ class AttendanceCalculateView(APIView):
             # get the transaction that its check out field is not set
             detail_with_no_check_out = attendance.attendance_details.filter(check_out=None).first()
 
-            # if there is no check out set in the attendance or it's  last transaction
-            if detail_with_no_check_out and not attendance.check_out:
-                raise ValueError("there is no attendance details for this date ")
+            # if there is no check out set in the attendance's  last transaction
+            if detail_with_no_check_out:
+                raise ValueError("there is a transaction required data not completed ")
 
             # checks if attendance has transaction
             if attendance.attendance_details.all():
-                # case if administrator set the check out in attendance and didnt set it in the last
-                # transaction of attendance
-                if detail_with_no_check_out and attendance.check_out:
-                    detail_with_no_check_out.check_out = attendance.check_out
-                    detail_with_no_check_out.save()
-                else:
-                    attendance.check_out = calculate_checkout_time(attendance.attendance_details.all())
-
+                attendance.check_out = calculate_checkout_time(attendance.attendance_details.all())
                 attendance.worked_hours = calculate_worked_hours(attendance.attendance_details.all())
+            else:
+                raise ValueError(
+                    "there is no attendance details . each Attendance should have at least 1 transaction "
+                )
 
             attendance.status = STATUS_CLOSED
             attendance.save()

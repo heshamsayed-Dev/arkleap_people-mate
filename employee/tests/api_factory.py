@@ -11,6 +11,7 @@ from employee.models.employee_model import Employee
 from employee.models.location_model import Location
 from employee.models.position_model import Position
 from people_mate.users.models import User
+from policy.models.policy_model import Policy
 
 
 class UserFactory(DjangoModelFactory):
@@ -49,6 +50,16 @@ class LocationFactory(DjangoModelFactory):
     branch = factory.SubFactory(CompanyBranchFactory)
 
 
+class PolicyFactory(DjangoModelFactory):
+    class Meta:
+        model = Policy
+
+    company = factory.SubFactory(CompanyFactory)
+    working_hours = 8
+    working_policy_start_date = Faker().time("10")
+    working_policy_end_date = Faker().time("18")
+
+
 class DepartmentFactory(DjangoModelFactory):
     class Meta:
         model = Department
@@ -76,4 +87,5 @@ class EmployeeFactory(DjangoModelFactory):
     position = factory.SubFactory(PositionFactory)
     company = factory.SubFactory(CompanyFactory)
     branch = factory.SubFactory(CompanyBranchFactory)
+    policy = factory.SubFactory(PolicyFactory)
     user = factory.SubFactory(UserFactory)
