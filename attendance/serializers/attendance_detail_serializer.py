@@ -130,6 +130,7 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
             # deletes attendance check out value if existed because it will be calculated again
             if attendance.check_out:
                 attendance.check_out = None
+            instance.check_out = validated_data.get("check_out")
 
         instance.save()
         attendance.status = STATUS_OPEN
