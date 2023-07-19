@@ -1,6 +1,7 @@
 from django.db import models
 
 from people_mate.users.models import User
+from policy.models.policy_model import Policy
 
 from .company_branch_model import CompanyBranch
 from .company_model import Company
@@ -16,10 +17,10 @@ class Employee(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
+    policy = models.ForeignKey(Policy, on_delete=models.CASCADE)
     mobile = models.CharField(verbose_name="Mobile")
-    user=models.OneToOneField(User,on_delete=models.SET_NULL,null=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="created_employees", null=True)
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="updated_employees", null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
-    
