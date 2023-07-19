@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from rest_framework import serializers
 
+from attendance.constants import STATUS_OPEN
 from attendance.models.attendance_detail_model import AttendanceDetail
 from attendance.models.attendance_model import Attendance
 
@@ -17,82 +18,124 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
             "attendance": {"read_only": True},
         }
 
-    def get_or_create_parent_attendance(self, check_in, employee):
-        try:
-            if not employee.branch:
-                raise ValueError("this employee has no branch please set him a branch first")
-            if not employee.policy:
-                raise ValueError("this employee has no working policy please set him a one first")
+    # validates if check in of transaction is between other transaction check in and check out
+    def validate_overlapping_in_check_in(self, check_in, attendance_details):
+        if attendance_details.filter(check_in__lte=check_in, check_out__gte=check_in).exists():
+            raise serializers.ValidationError("the check in date time you entered is within another transaction ")
 
-            attendances = Attendance.objects.filter(
-                date__range=[check_in.date() - datetime.timedelta(days=1), check_in.date()],
-                employee=employee,
-                status="open",
-            )
+    # validates if check out of transaction is between other transaction check in and check out
+    def validate_overlapping_in_check_out(self, check_out, attendance_details):
+        if attendance_details.filter(check_in__lte=check_out, check_out__gte=check_out).exists():
+            raise serializers.ValidationError("the check out date time you entered is within another transaction ")
 
-            if not attendances:
-                raise Attendance.DoesNotExist()
-            if attendances.count() == 2:
-                attendance = attendances.get(date=check_in.date())
+    # validates if check in and check out of this transaction contains a whole transaction between them
+    def validate_transaction_overlapping(self, check_in, check_out, attendance_details):
+        if attendance_details.filter(check_out__lte=check_out, check_in__gte=check_in).exists():
+            raise serializers.ValidationError("there is a complete transaction between this transaction dates  ")
 
-            else:
-                if attendances[0].date == check_in.date():
-                    attendance = attendances[0]
+    # returns right attendance date for transaction being created
+    def get_right_attendance_date(self, check_in, employee):
+        shift_start_datetime = datetime.datetime.combine(check_in.date(), employee.policy.working_policy_start_date)
+        shift_end_datetime = shift_start_datetime + timedelta(hours=employee.policy.working_hours)
 
-                else:
-                    shift_start_datetime = datetime.datetime.combine(
-                        attendances[0].date, attendances[0].shift_start_time
-                    )
+        # checks if shift starts and ends in the same day then the transaction is related to this date
+        if shift_start_datetime.date() == shift_end_datetime.date():
+            return check_in.date()
 
-                    # case that shift from night to next day morning
-                    if attendances[0].shift_start_time > attendances[0].shift_end_time:
-                        shift_end_datetime = datetime.datetime.combine(
-                            attendances[0].date + timedelta(days=1),
-                            attendances[0].shift_end_time,
-                        )
-                    else:
-                        shift_end_datetime = (
-                            attendances[0].date + timedelta(days=1),
-                            attendances[0].shift_end_time,
-                        )
+        # checks if  transaction check_in is between (shift start datetime - buffer)
+        #  and (shift end datetime + buffer)
+        if (
+            shift_start_datetime - timedelta(hours=6)
+            < check_in.replace(tzinfo=None)
+            < shift_end_datetime + timedelta(hours=6)
+        ):
+            return check_in.date()
 
-                    if (
-                        shift_start_datetime
-                        <= check_in.replace(tzinfo=None)
-                        <= shift_end_datetime + timedelta(hours=5)
-                    ):
-                        attendance = attendances[0]
-                    else:
-                        raise Attendance.DoesNotExist()
+        # if it passed the above conditions then this transaction is related to the day before
+        # check_in date
+        else:
+            return check_in.date() - timedelta(days=1)
 
-        except Attendance.DoesNotExist:
-            attendance = Attendance.objects.create(
-                date=check_in.date(),
-                employee=employee,
-                check_in=check_in,
-                status="open",
-                shift_start_time=employee.policy.working_policy_start_date,
-                shift_end_time=employee.policy.working_policy_end_date,
-                creation_method="automatic",
-            )
+    def create_attendance(self, date, employee, check_in):
+        attendance = Attendance.objects.create(
+            date=date,
+            employee=employee,
+            check_in=check_in,
+            status=STATUS_OPEN,
+            shift_start_time=employee.policy.working_policy_start_date,
+            shift_end_time=employee.policy.working_policy_end_date,
+        )
         return attendance
+
+    def get_or_create_parent_attendance(self, check_in, employee):
+        if not employee.branch:
+            raise ValueError("this employee has no branch please set him a branch first")
+        if not employee.policy:
+            raise ValueError("this employee has no working policy please set him a one first")
+
+        right_date = self.get_right_attendance_date(check_in, employee)
+        attendance = Attendance.objects.filter(
+            date=right_date,
+            employee=employee,
+        ).first()
+        # checks whether there is a created attendance for this transaction or create a new one
+        if attendance:
+            return attendance
+        else:
+            return self.create_attendance(right_date, employee, check_in)
 
     def create(self, validated_data):
         employee = self.context.get("employee")
         attendance = self.get_or_create_parent_attendance(validated_data["check_in"], employee)
+
         if attendance.attendance_details:
             if attendance.attendance_details.filter(check_out=None).exists():
                 raise serializers.ValidationError("There is transaction that has no check out please set it first")
 
             if attendance.attendance_details.filter(check_out__gte=validated_data["check_in"]).exists():
-                raise serializers.ValidationError(
-                    "There is transaction that has check out date after this check in date"
+                self.validate_overlapping_in_check_in(validated_data["check_in"], attendance.attendance_details)
+                attendance.check_in = validated_data["check_in"]
+
+            if validated_data.get("check_out"):
+                self.validate_overlapping_in_check_out(validated_data.get("check_out"), attendance.attendance_details)
+                self.validate_transaction_overlapping(
+                    validated_data["check_in"], validated_data["check_out"], attendance.attendance_details
                 )
 
+        # if any transaction created for attendance entity then it's status should be open
         attendance_detail = AttendanceDetail.objects.create(
             attendance=attendance, **validated_data, branch=attendance.employee.branch
         )
+        attendance.status = STATUS_OPEN
+        attendance.save()
         return attendance_detail
+
+    def update(self, instance, validated_data):
+        attendance = instance.attendance
+        attendance_details = attendance.attendance_details.exclude(id=instance.id)
+        if validated_data.get("check_in"):
+            self.validate_overlapping_in_check_in(validated_data.get("check_in"), attendance_details)
+            instance.check_in = validated_data.get("check_in")
+            # checks if this transaction is the first transaction made for this parent attendance
+            if instance.check_in == attendance.check_in:
+                attendance.check_in = validated_data.get("check_in")
+            # checks if this transaction check in is less than the attendance check in time
+            elif validated_data.get("check_in") < attendance.check_in:
+                attendance.check_in = validated_data.get("check_in")
+
+        if validated_data.get("check_out"):
+            check_in = validated_data.get("check_in", getattr(self.instance, "check_in", None))
+            self.validate_overlapping_in_check_out(validated_data.get("check_out"), attendance_details)
+            self.validate_transaction_overlapping(check_in, validated_data.get("check_out"), attendance_details)
+            # deletes attendance check out value if existed because it will be calculated again
+            if attendance.check_out:
+                attendance.check_out = None
+            instance.check_out = validated_data.get("check_out")
+
+        instance.save()
+        attendance.status = STATUS_OPEN
+        attendance.save()
+        return instance
 
     def validate(self, data):
         check_in = data.get("check_in", getattr(self.instance, "check_in", None))
@@ -102,12 +145,6 @@ class AttendanceDetailSerializer(serializers.ModelSerializer):
 
         if check_out and check_in and check_out > (check_in + timedelta(hours=24)):
             raise serializers.ValidationError("The check_out date cant be after 1 day of its check_in .")
-
-        att = Attendance.objects.filter(date=check_in.date(), status="closed").first()
-        if att:
-            raise serializers.ValidationError(
-                "you cant create or edit any transaction for this date it's attendance is already closed ."
-            )
 
         return data
 

@@ -1,40 +1,50 @@
 from faker import Faker
 from rest_framework.test import APITestCase
 
+from employee.constants import STATUS_CURRENT, STATUS_EXPIRED
 from employee.models.company_branch_model import CompanyBranch
 from employee.models.company_model import Company
 from employee.models.department_model import Department
 from employee.models.employee_model import Employee
 from employee.models.location_model import Location
 from employee.models.position_model import Position
-# from django.contrib.auth.models import User
-from .utils import set_authentication_token
-
 from people_mate.users.models import User
+from policy.models.policy_model import Policy
+
 from .api_factory import (
     CompanyBranchFactory,
     CompanyFactory,
     DepartmentFactory,
     EmployeeFactory,
     LocationFactory,
+    PolicyFactory,
     PositionFactory,
     UserFactory,
 )
+
+# from django.contrib.auth.models import User
+from .utils import set_authentication_token
 
 
 class TestEmployeeCreation(APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user=UserFactory()
+        cls.user = UserFactory()
         cls.company = CompanyFactory()
         cls.branch = CompanyBranchFactory(company=cls.company)
-        cls.location  = LocationFactory(branch=cls.branch)
+        cls.location = LocationFactory(branch=cls.branch)
         cls.position = PositionFactory(company=cls.company)
         cls.department = DepartmentFactory(company=cls.company)
+        cls.policy = PolicyFactory(company=cls.company)
 
         cls.employee = EmployeeFactory(
-            company=cls.company, branch=cls.branch, department=cls.department, position=cls.position,user=cls.user
+            company=cls.company,
+            branch=cls.branch,
+            department=cls.department,
+            position=cls.position,
+            user=cls.user,
+            policy=cls.policy,
         )
 
     def test_create_user(self):
@@ -54,6 +64,9 @@ class TestEmployeeCreation(APITestCase):
 
     def test_create_position(self):
         self.assertEqual(Position.objects.count(), 1)
+
+    def test_create_policy(self):
+        self.assertEqual(Policy.objects.count(), 1)
 
     def test_create_employee(self):
         self.assertEqual(Employee.objects.count(), 1)
@@ -154,7 +167,7 @@ class TestEmployeeCreation(APITestCase):
 
     def test_update_location_patch(self):
         set_authentication_token(self)
-        data = {"status": "expired"}
+        data = {"status": STATUS_EXPIRED}
         response = self.client.patch(f"/locations/{self.location.id}/update", data=data, format="json")
         self.assertEqual(response.status_code, 200)
 
@@ -163,7 +176,7 @@ class TestEmployeeCreation(APITestCase):
         data = {
             "longitude": Faker().random.uniform(-180.0, 180.0),
             "latitude": Faker().random.uniform(-90.0, 90.0),
-            "status": "current",
+            "status": STATUS_CURRENT,
             "branch": self.branch.id,
         }
         response = self.client.put(f"/locations/{self.location.id}/update", data=data, format="json")
@@ -258,7 +271,7 @@ class TestEmployeeCreation(APITestCase):
 
     def test_create_employee_api(self):
         set_authentication_token(self)
-        user=User.objects.create(username=Faker().name(),password='123')
+        user = User.objects.create(username=Faker().name(), password="123")
         data = {
             "name": Faker().name(),
             "email": Faker().email(),
@@ -267,7 +280,8 @@ class TestEmployeeCreation(APITestCase):
             "position": self.position.id,
             "branch": self.branch.id,
             "company": self.company.id,
-            "user":user.id,
+            "policy": self.policy.id,
+            "user": user.id,
         }
         response = self.client.post("/employees/create", data=data, format="json")
         self.assertEqual(response.status_code, 201)
@@ -288,7 +302,8 @@ class TestEmployeeCreation(APITestCase):
             "position": self.position.id,
             "branch": self.branch.id,
             "company": self.company.id,
-            "user":self.user.id,
+            "policy": self.policy.id,
+            "user": self.user.id,
         }
         response = self.client.put(f"/employees/{self.employee.id}/update", data=data, format="json")
         self.assertEqual(response.status_code, 200)

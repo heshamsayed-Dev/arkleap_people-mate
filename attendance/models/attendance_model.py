@@ -1,9 +1,7 @@
 from django.db import models
 
+from attendance.constants import STATUS_CHOICES
 from employee.models.employee_model import Employee
-
-status_choices = (("open", "Open"), ("closed", "Closed"))
-creation_choices = (("manual", "Manual"), ("automatic", "Automatic"))
 
 
 class Attendance(models.Model):
@@ -14,7 +12,6 @@ class Attendance(models.Model):
     worked_hours = models.FloatField(null=True)
     shift_start_time = models.TimeField(null=True)
     shift_end_time = models.TimeField(null=True)
-    status = models.CharField(max_length=15, choices=status_choices)
-    creation_method = models.CharField(max_length=15, choices=creation_choices)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
