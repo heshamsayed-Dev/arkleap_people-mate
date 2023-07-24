@@ -15,7 +15,7 @@ class UserFactory(DjangoModelFactory):
     # name = Faker("name")
     is_active = True
     role = "employee"
-    password = make_password("1234AA")
+    password = make_password("123Aa$bb")
     # @post_generation
     # def password(self, create: bool, extracted: Sequence[Any], **kwargs):
     #     password = (

@@ -30,7 +30,7 @@ class TestAttendanceCreation(APITestCase):
     def test_user_login(self):
         user_credentials = {
             "email": self.user.email,
-            "password": "1234AA",
+            "password": "123Aa$bb",
         }
         response = self.client.post("/api/login", data=user_credentials)
         self.assertEqual(response.status_code, 200)

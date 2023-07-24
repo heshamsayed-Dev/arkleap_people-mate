@@ -1,7 +1,8 @@
+import re
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-# import re
 User = get_user_model()
 
 
@@ -36,6 +37,20 @@ class UserSerializer(serializers.ModelSerializer):
     #     if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
     #         raise serializers.ValidationError("Invalid email address that follows this example User@host.com")
     #     return value
+
+    def validate_password(self, value):
+        # Define a regex pattern to match passwords with at least 8 characters,
+        # one lowercase letter, one uppercase letter, one digit, and one special character.
+        pattern = r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+])(?=.*[a-zA-Z]).{8,}$"
+
+        # Check if the value matches the pattern.
+        if not re.match(pattern, value):
+            raise serializers.ValidationError(
+                """Password must be at least 8 characters long and contain at least one
+                 lowercase letter, one uppercase letter, one digit, and one special character."""
+            )
+
+        return value
 
 
 class SignInSerializer(serializers.Serializer):
