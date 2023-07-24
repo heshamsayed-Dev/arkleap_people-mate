@@ -47,7 +47,9 @@ class UserSerializer(serializers.ModelSerializer):
         if not re.match(pattern, value):
             raise serializers.ValidationError(
                 """Password must be at least 8 characters long and contain at least one
-                 lowercase letter, one uppercase letter, one digit, and one special character."""
+lowercase letter, one uppercase letter, one digit, and one special character.""".replace(
+                    "\n", " "
+                )
             )
 
         return value
