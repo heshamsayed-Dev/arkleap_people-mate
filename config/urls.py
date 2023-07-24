@@ -7,7 +7,9 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt import views as jwt_views
+
 from people_mate.users.api.views import UserViewSet
+
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
@@ -25,7 +27,6 @@ urlpatterns = [
     path("policy/", include("policy.urls.policy_urls")),
     path("attendances/", include("attendance.urls.attendance_urls")),
     path("attendance-details/", include("attendance.urls.attendance_detail_urls")),
-
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
@@ -37,7 +38,8 @@ urlpatterns += [
     # API base url
     path("api/", include("config.api_router")),
     # DRF auth token
-    path("api/token/", jwt_views.TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    # path("api/token/", jwt_views.TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/login", UserViewSet.as_view({"post": "sign_in"}), name="sign_in"),
     path("api/token/refresh", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
@@ -45,8 +47,8 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
-    path('api/signup', UserViewSet.as_view({'post': 'signup'}),name='signup'),
-    path('api/signout', UserViewSet.as_view({'get': 'signout'}),name='signout'),
+    path("api/signup", UserViewSet.as_view({"post": "signup"}), name="signup"),
+    path("api/signout", UserViewSet.as_view({"get": "signout"}), name="signout"),
 ]
 
 if settings.DEBUG:

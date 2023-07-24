@@ -29,5 +29,10 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    list_display = ["username", "name", "is_superuser"]
+    list_display = ["username", "name", "is_superuser", "is_active"]
     search_fields = ["name"]
+    actions = ["activate_users"]
+
+    def activate_users(self, request, queryset):
+        cnt = queryset.filter(is_active=False).update(is_active=True)
+        self.message_user(request, f"Activated {cnt} users.")
