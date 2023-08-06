@@ -17,7 +17,7 @@ class Employee(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
-    policy = models.ForeignKey(Policy, on_delete=models.CASCADE)
+    policy = models.ForeignKey(Policy, on_delete=models.SET_NULL, null=True)
     mobile = models.CharField(verbose_name="Mobile")
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="created_employees", null=True)
