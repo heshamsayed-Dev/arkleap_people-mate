@@ -22,7 +22,7 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=False)
     role = models.CharField(max_length=150, blank=True, null=True)
     email = models.EmailField(unique=True)
-
+    otp_secret = models.CharField(max_length=150, blank=True, null=True)
     # USERNAME_FIELD = 'email'
 
     # def get_absolute_url(self) -> str:

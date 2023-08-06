@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data.get("password") != data.get("password_confirm"):
-            raise serializers.ValidationError({"details": "passwords didnt match"})
+            raise serializers.ValidationError({"messages": "passwords didnt match"})
 
         return data
 
@@ -58,3 +58,31 @@ lowercase letter, one uppercase letter, one digit, and one special character."""
 class SignInSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True)
     password = serializers.CharField(max_length=255, required=True)
+    otp = serializers.CharField(max_length=255, required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length=255, required=True)
+    password_confirm = serializers.CharField(max_length=255, required=True)
+
+    def validate(self, data):
+        if data.get("password") != data.get("password_confirm"):
+            raise serializers.ValidationError({"message": "passwords didnt match"})
+
+        return data
+
+    def validate_password(self, value):
+        # Define a regex pattern to match passwords with at least 8 characters,
+        # one lowercase letter, one uppercase letter, one digit, and one special character.
+        pattern = r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+])(?=.*[a-zA-Z]).{8,}$"
+
+        # Check if the value matches the pattern.
+        if not re.match(pattern, value):
+            raise serializers.ValidationError(
+                """Password must be at least 8 characters long and contain at least one
+lowercase letter, one uppercase letter, one digit, and one special character.""".replace(
+                    "\n", " "
+                )
+            )
+
+        return value
