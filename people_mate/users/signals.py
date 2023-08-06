@@ -57,6 +57,3 @@ def user_post_save_action(**kwargs):
         generate_user_secret_key(user)
         image_stream = generate_otp_qrcode(user)
         send_mail_to_user(user.email, image_stream)
-
-
-#
