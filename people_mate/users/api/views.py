@@ -26,7 +26,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         return self.queryset.filter(id=self.request.user.id)
 
     def verify_otp(self, user, otp):
-        totp = pyotp.TOTP(user.otp_secret, interval=60)
+        totp = pyotp.TOTP(user.otp_secret, interval=30)
         if totp.verify(otp):
             return True
         else:
