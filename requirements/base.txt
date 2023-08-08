@@ -23,3 +23,6 @@ django-cors-headers==4.1.0  # https://github.com/adamchainz/django-cors-headers
 drf-spectacular==0.26.2  # https://github.com/tfranzel/drf-spectacular
 
 djangorestframework-simplejwt # https://github.com/jazzband/djangorestframework-simplejwt
+
+pyotp
+qrcode
