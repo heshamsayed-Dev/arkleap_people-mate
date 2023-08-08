@@ -66,7 +66,8 @@ class CompanyAPIView(APIView):
     def delete(self, request, pk):
         try:
             company = get_model_by_pk("Company", pk)
-            company.delete()
+            company.end_date = datetime.today().date()
+            company.save()
             return Response(data={"message": "Company deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
