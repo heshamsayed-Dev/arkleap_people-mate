@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from employee.models.company_model import Company
+
 # from django.db.models import CharField
 # from django.urls import reverse
 # from django.utils.translation import gettext_lazy as _
@@ -23,6 +25,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=150, blank=True, null=True)
     email = models.EmailField(unique=True)
     otp_secret = models.CharField(max_length=150, blank=True, null=True)
+    companies = models.ManyToManyField(Company, related_name="users")
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     # USERNAME_FIELD = 'email'
 
     # def get_absolute_url(self) -> str:
