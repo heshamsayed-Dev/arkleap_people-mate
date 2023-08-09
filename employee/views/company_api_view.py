@@ -5,10 +5,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from employee.models.company_model import Company
+# from employee.models.company_model import Company
 from employee.serializers.company_serializer import CompanySerializer
 
-from .utils import get_model_by_pk
+from .utils import CustomPaginator, get_model_by_pk
 
 
 class CompanyAPIView(APIView):
@@ -18,9 +18,11 @@ class CompanyAPIView(APIView):
                 company = get_model_by_pk("Company", pk)
                 serializer = CompanySerializer(company)
             else:
-                companies = Company.objects.all()
-                serializer = CompanySerializer(companies, many=True)
-            return Response(serializer.data)
+                companies = request.user.companies().filter(end_date__lte=datetime.today().date())
+                paginator = CustomPaginator(1)
+                paginated_companies = paginator.paginate_queryset(companies, request)
+                serializer = CompanySerializer(paginated_companies, many=True)
+                return paginator.get_paginated_response(serializer.data)
 
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -28,7 +30,9 @@ class CompanyAPIView(APIView):
     def post(self, request):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            # serializer.save()
+            company = self.perform_create(serializer)
+            request.user.companies.add(company)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
