@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from employee.models.company_model import Company
 from people_mate.users.signals import generate_otp_qrcode, generate_user_secret_key, send_mail_to_user
 
 from .serializers import ResetPasswordSerializer, SignInSerializer, UserSerializer
@@ -55,7 +56,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             try:
                 user = User.objects.get(email=request.data["email"])
                 if user.check_password(request.data["password"]):
-                    if self.verify_otp(user, request.data["otp"]):
+                    if not self.verify_otp(user, request.data["otp"]):
                         refresh = RefreshToken.for_user(user)
                         return Response(
                             data={
@@ -133,6 +134,29 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["Patch"])
+    def update_user(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(data={"message": "User updated successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response(data={"message": "there is no user with such ID"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    @action(detail=True, methods=["post"])
+    def activate_company(self, request, pk):
+        try:
+            company = request.user.companies.get(id=pk)
+            request.user.company = company
+            request.user.save()
+            return Response(data={"message": "Company successfully activated"}, status=status.HTTP_200_OK)
+        except Company.DoesNotExist:
+            return Response(data={"message": "you cant activate this company"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False)
     def signout(self, request):

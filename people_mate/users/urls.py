@@ -15,4 +15,6 @@ urlpatterns = [
         name="validate-otp",
     ),
     path("<int:pk>/reset-password", UserViewSet.as_view({"post": "reset_password"}), name="reset-password"),
+    path("<int:pk>/update", UserViewSet.as_view({"patch": "update_user"}), name="update_user"),
+    path("activate-company/<int:pk>", UserViewSet.as_view({"post": "activate_company"}), name="activate_company"),
 ]

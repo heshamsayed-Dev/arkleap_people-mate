@@ -20,9 +20,9 @@ class User(AbstractUser):
     name = None
     first_name = None  # type: ignore
     last_name = None  # type: ignore
-    avatar = models.ImageField(upload_to="avatars/", blank=True, default="avatars/default_avatar.jpg")
+    avatar = models.ImageField(upload_to="avatars/", default="avatars/default_avatar.jpg")
     is_active = models.BooleanField(default=False)
-    role = models.CharField(max_length=150, blank=True, null=True)
+    role = models.CharField(max_length=150, null=True)
     email = models.EmailField(unique=True)
     otp_secret = models.CharField(max_length=150, blank=True, null=True)
     companies = models.ManyToManyField(Company, related_name="users")

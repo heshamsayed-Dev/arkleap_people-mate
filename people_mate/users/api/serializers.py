@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password", "password_confirm", "avatar"]
+        fields = ["username", "email", "password", "password_confirm", "avatar", "role", "companies", "company"]
 
         extra_kwargs = {
             "password": {"write_only": True},
@@ -32,6 +32,21 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        if validated_data.get("role"):
+            instance.role = validated_data.get("role")
+        if validated_data.get("username"):
+            instance.username = validated_data.get("username")
+        if validated_data.get("email"):
+            instance.email = validated_data.get("email")
+        if validated_data.get("companies"):
+            instance.companies.set(validated_data.get("companies"))
+        if validated_data.get("avatar"):
+            instance.avatar = validated_data.get("avatar")
+
+        instance.save()
+        return instance
 
     # def validate_email(self,value):
     #     if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
