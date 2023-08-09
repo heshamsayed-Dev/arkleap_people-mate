@@ -112,7 +112,8 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             user = User.objects.get(id=pk)
             if request.data.get("otp"):
                 if self.verify_otp(user, request.data["otp"]):
-                    return Response(data={"user": user.id, "message": "Correct OTP"}, status=status.HTTP_200_OK)
+                    refresh = RefreshToken.for_user(user)
+                    return Response(data={"access": str(refresh.access_token)}, status=status.HTTP_200_OK)
                 else:
                     return Response(data={"message": "Incorrect OTP"}, status=status.HTTP_403_FORBIDDEN)
 
@@ -123,11 +124,11 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             return Response(data={"message": "there is no user with such ID"}, status=status.HTTP_401_UNAUTHORIZED)
 
     @action(detail=False, methods=["POST"])
-    def reset_password(self, request, pk):
+    def reset_password(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                user = User.objects.get(id=pk)
+                user = request.user
                 user.password = make_password(request.data["password"])
                 user.save()
                 return Response(data={"message": "password has been successfully changed"}, status=status.HTTP_200_OK)
@@ -174,7 +175,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             "sign_in",
             "reset_password_send_email",
             "reset_password_validate_otp",
-            "reset_password",
+            # "reset_password",
         ):
             return [AllowAny()]
         else:
