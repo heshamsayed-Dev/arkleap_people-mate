@@ -25,7 +25,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=150, null=True)
     email = models.EmailField(unique=True)
     otp_secret = models.CharField(max_length=150, blank=True, null=True)
-    companies = models.ManyToManyField(Company, related_name="users")
+    companies = models.ManyToManyField(Company, related_name="users", blank=True)
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     # USERNAME_FIELD = 'email'
 

@@ -33,6 +33,13 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def validate_companies(self, value):
+        if value:
+            admin_companies_set = set(self.context.get("user_companies").values_list("id", flat=True))
+            sent_companies = {int(company.id) for company in value}
+            if not sent_companies.issubset(admin_companies_set):
+                raise serializers.ValidationError("you cant give access to companies you dont have access to")
+
     def update(self, instance, validated_data):
         if validated_data.get("role"):
             instance.role = validated_data.get("role")

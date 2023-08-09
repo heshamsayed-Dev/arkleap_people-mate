@@ -40,7 +40,9 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     @action(detail=False, methods=["POST"])
     def signup(self, request):
-        serializer = UserSerializer(data=request.data, context={"request": request})
+        serializer = UserSerializer(
+            data=request.data, context={"request": request, "user_companies": request.user.companies}
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -139,7 +141,9 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
     def update_user(self, request, pk):
         try:
             user = User.objects.get(id=pk)
-            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer = UserSerializer(
+                user, data=request.data, partial=True, context={"user_companies": request.user.companies}
+            )
             if serializer.is_valid():
                 serializer.save()
                 return Response(data={"message": "User updated successfully"}, status=status.HTTP_200_OK)
@@ -166,7 +170,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     def get_permissions(self):
         if self.action in (
-            "signup",
+            # "signup",
             "sign_in",
             "reset_password_send_email",
             "reset_password_validate_otp",
