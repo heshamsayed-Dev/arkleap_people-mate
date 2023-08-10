@@ -6,6 +6,8 @@ from attendance.models.attendance_model import Attendance
 from attendance.serializers.attendance_filter_serializer import AttendanceFilterSerializer
 from attendance.serializers.attendance_serializer import AttendanceSerializer
 
+from .utils import CustomPaginator
+
 
 class AttendanceFilterView(APIView):
     def post(self, request):
@@ -18,7 +20,12 @@ class AttendanceFilterView(APIView):
                 queryset = queryset.filter(date__gte=request.data.get("date_from"))
             if request.data.get("date_to"):
                 queryset = queryset.filter(date__lte=request.data.get("date_to"))
-            serializer = AttendanceSerializer(queryset, many=True)
-            return Response(serializer.data)
+
+            paginator = CustomPaginator(1)
+            paginated_attendances = paginator.paginate_queryset(queryset, request)
+            serializer = AttendanceSerializer(paginated_attendances, many=True)
+            return paginator.get_paginated_response(serializer.data)
+            # serializer = AttendanceSerializer(queryset, many=True)
+            # return Response(serializer.data)
         else:
             return Response(filter_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,17 +1,21 @@
+import ast
+
 from .base import *  # noqa
 from .base import env
 
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = True
+DEBUG = os.environ["DEBUG"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env(
     "DJANGO_SECRET_KEY",
-    default="qt5IubQGGbqjgmu4QxpYoIjUeydoH6qV2tOj1W1AkyaxZfeY11vw0fkdUnQpDmrr",
+    default=os.environ["DEFAULT_SECRET_KEY"],
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+
+ALLOWED_HOSTS = ast.literal_eval(os.environ["ALLOWED_HOSTS"])
+
 
 # CACHES
 # ------------------------------------------------------------------------------

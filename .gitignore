@@ -335,3 +335,4 @@ people_mate/media/
 Dockerfile
 config/settings/base.py
 migrations
+.env
