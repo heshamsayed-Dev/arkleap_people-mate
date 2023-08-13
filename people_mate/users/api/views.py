@@ -39,7 +39,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
     @action(detail=False, methods=["POST"])
-    def signup(self, request):
+    def create_user(self, request):
         serializer = UserSerializer(
             data=request.data, context={"request": request, "user_companies": request.user.companies}
         )
@@ -58,7 +58,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             try:
                 user = User.objects.get(email=request.data["email"])
                 if user.check_password(request.data["password"]):
-                    if not self.verify_otp(user, request.data["otp"]):
+                    if self.verify_otp(user, request.data["otp"]):
                         refresh = RefreshToken.for_user(user)
                         return Response(
                             data={
@@ -156,9 +156,10 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
     @action(detail=True, methods=["post"])
     def activate_company(self, request, pk):
         try:
-            company = request.user.companies.get(id=pk)
-            request.user.company = company
-            request.user.save()
+            user = request.user
+            company = user.companies.get(id=pk)
+            user.company = company
+            user.save()
             return Response(data={"message": "Company successfully activated"}, status=status.HTTP_200_OK)
         except Company.DoesNotExist:
             return Response(data={"message": "you cant activate this company"}, status=status.HTTP_400_BAD_REQUEST)

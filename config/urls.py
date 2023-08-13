@@ -47,7 +47,7 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
-    path("api/signup", UserViewSet.as_view({"post": "signup"}), name="signup"),
+    path("users/create", UserViewSet.as_view({"post": "create_user"}), name="create_users"),
     path("api/signout", UserViewSet.as_view({"get": "signout"}), name="signout"),
 ]
 
