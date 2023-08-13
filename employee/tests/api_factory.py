@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import factory
 from django.contrib.auth.hashers import make_password
+from django.utils.text import slugify
 from factory.django import DjangoModelFactory
 from faker import Faker
 
@@ -28,7 +31,17 @@ class CompanyFactory(DjangoModelFactory):
         model = Company
 
     name = Faker().name()
+    arabic_name = "بطه"
+    tax_number = Faker().random_number(digits=15)
+    commercial_record = Faker().random_number(digits=12)
     address = Faker().sentence()
+    phone = Faker().random_number(digits=9)
+    mobile = Faker().random_number(digits=12)
+    fax = Faker().random_number(digits=6)
+    email = Faker().email()
+    country = Faker().name()
+    slug = slugify(name)
+    start_date = datetime.today().date()
 
 
 class CompanyBranchFactory(DjangoModelFactory):
