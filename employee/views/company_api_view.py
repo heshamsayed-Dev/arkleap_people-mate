@@ -16,11 +16,13 @@ class CompanyAPIView(APIView):
     def get(self, request, pk=None):
         try:
             if pk:
-                company = get_model_by_pk("Company", pk)
-                serializer = CompanySerializer(company)
-                return Response(data=serializer.data)
+                if get_model_by_pk("Company", pk):
+                    company = request.user.companies.get(id=pk)
+                    serializer = CompanySerializer(company)
+                    return Response(data=serializer.data)
             else:
-                companies = request.user.companies.filter(end_date__lte=datetime.today().date())
+                # companies = request.user.companies.filter(end_date__lte=datetime.today().date())
+                companies = request.user.companies.all()
                 paginator = CustomPagination()
                 paginated_companies = paginator.paginate_queryset(companies, request)
                 serializer = CompanySerializer(paginated_companies, many=True)
@@ -28,6 +30,8 @@ class CompanyAPIView(APIView):
 
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return Response({"message": "you cant access this company"}, status=status.HTTP_403_FORBIDDEN)
 
     def post(self, request):
         company_logger = setup_logger("company", "./logs/company_log_file.txt")
@@ -43,11 +47,12 @@ class CompanyAPIView(APIView):
     def put(self, request, pk):
         company_logger = setup_logger("company", "./logs/company_log_file.txt")
         try:
-            company = get_model_by_pk("Company", pk)
-            query_dict = QueryDict("", mutable=True)
-            query_dict.update(request.data)
-            query_dict["updated_at"] = datetime.now()
-            serializer = CompanySerializer(company, data=query_dict)
+            if get_model_by_pk("Company", pk):
+                company = request.user.companies.get(id=pk)
+                query_dict = QueryDict("", mutable=True)
+                query_dict.update(request.data)
+                query_dict["updated_at"] = datetime.now()
+                serializer = CompanySerializer(company, data=query_dict)
 
             if serializer.is_valid():
                 serializer.save()
@@ -58,15 +63,18 @@ class CompanyAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return Response({"message": "you cant update this company"}, status=status.HTTP_403_FORBIDDEN)
 
     def patch(self, request, pk):
         company_logger = setup_logger("company", "./logs/company_log_file.txt")
         try:
-            company = get_model_by_pk("Company", pk)
-            query_dict = QueryDict("", mutable=True)
-            query_dict.update(request.data)
-            query_dict["updated_at"] = datetime.now()
-            serializer = CompanySerializer(company, data=query_dict, partial=True)
+            if get_model_by_pk("Company", pk):
+                company = request.user.companies.get(id=pk)
+                query_dict = QueryDict("", mutable=True)
+                query_dict.update(request.data)
+                query_dict["updated_at"] = datetime.now()
+                serializer = CompanySerializer(company, data=query_dict, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -76,12 +84,15 @@ class CompanyAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return Response({"message": "you cant update this company"}, status=status.HTTP_403_FORBIDDEN)
 
     def delete(self, request, pk):
         company_logger = setup_logger("company", "./logs/company_log_file.txt")
 
         try:
-            company = get_model_by_pk("Company", pk)
+            if get_model_by_pk("Company", pk):
+                company = request.user.companies.get(id=pk)
             if not company.employees.exists() or company.departments.exists():
                 company.end_date = datetime.today().date()
                 company.save()
@@ -95,3 +106,5 @@ class CompanyAPIView(APIView):
                 )
         except Http404 as e:
             return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return Response({"message": "you cant delete this company"}, status=status.HTTP_403_FORBIDDEN)
