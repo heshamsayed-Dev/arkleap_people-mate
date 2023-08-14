@@ -1,8 +1,6 @@
 from datetime import datetime
 
 from django.http import Http404, QueryDict
-
-# from  utils.paginator import CustomPagination
 from logs.logger_utils import setup_logger
 from rest_framework import status
 from rest_framework.response import Response
@@ -10,9 +8,9 @@ from rest_framework.views import APIView
 
 # from employee.models.company_model import Company
 from employee.serializers.company_serializer import CompanySerializer
+from utils.paginator import CustomPagination
 
-# from config.settings import base as base
-from .utils import CustomPagination, get_model_by_pk
+from .utils import get_model_by_pk
 
 
 class CompanyAPIView(APIView):
