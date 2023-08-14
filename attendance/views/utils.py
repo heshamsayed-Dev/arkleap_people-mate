@@ -1,5 +1,6 @@
 from django.apps import apps
 from django.http import Http404
+from rest_framework.pagination import PageNumberPagination
 
 
 def get_model_by_pk(model_name, pk):
@@ -25,3 +26,8 @@ def calculate_worked_hours(details):
         worked_hours += (det.check_out - det.check_in).total_seconds() / 3600
 
     return worked_hours
+
+
+class CustomPaginator(PageNumberPagination):
+    def __init__(self, page_size=10):
+        self.page_size = page_size
