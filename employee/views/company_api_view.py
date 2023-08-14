@@ -1,13 +1,12 @@
 from datetime import datetime
 
 from django.http import Http404, QueryDict
-from logs.logger_utils import setup_logger
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# from employee.models.company_model import Company
 from employee.serializers.company_serializer import CompanySerializer
+from logs.logger_utils import setup_logger
 from utils.paginator import CustomPagination
 
 from .utils import get_model_by_pk
@@ -19,9 +18,10 @@ class CompanyAPIView(APIView):
             if pk:
                 company = get_model_by_pk("Company", pk)
                 serializer = CompanySerializer(company)
+                return Response(data=serializer.data)
             else:
-                companies = request.user.companies().filter(end_date__lte=datetime.today().date())
-                paginator = CustomPagination(1)
+                companies = request.user.companies.filter(end_date__lte=datetime.today().date())
+                paginator = CustomPagination()
                 paginated_companies = paginator.paginate_queryset(companies, request)
                 serializer = CompanySerializer(paginated_companies, many=True)
                 return paginator.get_paginated_response(serializer.data)
@@ -33,8 +33,7 @@ class CompanyAPIView(APIView):
         company_logger = setup_logger("company", "./logs/company_log_file.txt")
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
-            # serializer.save()
-            company = self.perform_create(serializer)
+            company = serializer.save()
             request.user.companies.add(company)
             request.user.save()
             company_logger.info(f" user with  id '{request.user.id} has has created company {company.id} ")

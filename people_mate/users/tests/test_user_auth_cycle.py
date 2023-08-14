@@ -14,8 +14,7 @@ class TestAttendanceCreation(APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company_1 = CompanyFactory()
-        cls.company_2 = CompanyFactory()
-        cls.user = UserFactory(companies=(cls.company_1, cls.company_2), company=cls.company_2)
+        cls.user = UserFactory(companies=(cls.company_1), company=cls.company_1)
         cls.totp = pyotp.TOTP(cls.user.otp_secret, interval=30)
 
     def test_create_user(self):
@@ -64,7 +63,7 @@ class TestAttendanceCreation(APITestCase):
 
     def test_update_user(self):
         set_authentication_token(self)
-        data = {"companies": self.company_1.id}
+        data = {"companies": []}
         response = self.client.patch(f"/users/{self.user.id}/update", data=data)
         self.assertEqual(response.status_code, 200)
 

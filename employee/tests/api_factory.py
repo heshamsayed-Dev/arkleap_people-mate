@@ -22,7 +22,8 @@ class UserFactory(DjangoModelFactory):
         model = User
 
     username = Faker().name()
-    password = make_password("123")
+    email = Faker().email()
+    password = make_password("123Aa$bb")
     is_active = True
 
 
