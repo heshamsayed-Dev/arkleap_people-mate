@@ -15,7 +15,7 @@ class Employee(models.Model):
     email = models.CharField(max_length=128, verbose_name="Email")
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="employees")
     branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
     policy = models.ForeignKey(Policy, on_delete=models.SET_NULL, null=True)
     mobile = models.CharField(verbose_name="Mobile")
