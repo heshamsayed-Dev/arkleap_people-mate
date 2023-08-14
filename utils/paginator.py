@@ -1,18 +1,5 @@
-from django.apps import apps
-from django.http import Http404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-
-
-def get_model_by_pk(model_name, pk):
-    model = apps.get_model("employee", model_name)
-    obj = model.objects.filter(pk=pk).first()
-    if not obj:
-        raise Http404(f"{model_name} not found")
-    return obj
-
-
-# from rest_framework.pagination import PageNumberPagination
 
 
 class CustomPagination(PageNumberPagination):
