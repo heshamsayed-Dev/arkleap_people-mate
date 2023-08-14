@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from config.settings.base import EMAIL_HOST_USER
+from logs.logger_utils import setup_logger
 
 from .models import User
 
@@ -36,17 +37,28 @@ def generate_otp_qrcode(user):
     return image_stream
 
 
-def send_mail_to_user(email, image_stream):
-    email = EmailMessage(
-        "OTP QR Code",
-        "Please scan the attached QR code using Google Authenticator to set up OTP.",
-        EMAIL_HOST_USER,
-        [email],
-    )
-    email.attach("qrcode.png", image_stream.getvalue(), "image/png")
+def send_mail_to_user(mail, image_stream, caller):
+    if caller == "register_user":
+        logger = setup_logger("register_send_mail", "./logs/register_send_mail_log_file.txt")
+    else:
+        logger = setup_logger("reset_password_send_mail", "./logs/reset_password_send_mail_log_file.txt")
+    title = "OTP QR Code"
+    message = "Please scan the attached QR code using Google Authenticator to set up OTP."
+    try:
+        email = EmailMessage(
+            title,
+            message,
+            EMAIL_HOST_USER,
+            [mail],
+        )
+        email.attach("qrcode.png", image_stream.getvalue(), "image/png")
 
-    # Send the email
-    email.send(fail_silently=False)
+        # Send the email
+        email.send(fail_silently=False)
+        logger.info(f" email with title : {title} ,subject : {message} recepient : {mail} has been sent")
+
+    except Exception as e:
+        logger.info("An error occurred: %s", e, exc_info=True)
 
 
 @receiver(post_save, sender=User)
@@ -56,4 +68,4 @@ def user_post_save_action(**kwargs):
         user = kwargs.get("instance")
         generate_user_secret_key(user)
         image_stream = generate_otp_qrcode(user)
-        send_mail_to_user(user.email, image_stream)
+        send_mail_to_user(user.email, image_stream, "register_user")

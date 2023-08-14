@@ -21,7 +21,7 @@ class User(AbstractUser):
     first_name = None  # type: ignore
     last_name = None  # type: ignore
     avatar = models.ImageField(upload_to="avatars/", default="avatars/default_avatar.jpg")
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     role = models.CharField(max_length=150, null=True)
     email = models.EmailField(unique=True)
     otp_secret = models.CharField(max_length=150, blank=True, null=True)

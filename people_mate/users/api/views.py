@@ -9,7 +9,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
+# import logger
 from employee.models.company_model import Company
+from logs.logger_utils import setup_logger
 from people_mate.users.signals import generate_otp_qrcode, generate_user_secret_key, send_mail_to_user
 
 from .serializers import ResetPasswordSerializer, SignInSerializer, UserSerializer
@@ -40,25 +42,34 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     @action(detail=False, methods=["POST"])
     def create_user(self, request):
+        create_user_logger = setup_logger("create_user_logger", "./logs/create_user_log_file.txt")
         serializer = UserSerializer(
             data=request.data, context={"request": request, "user_companies": request.user.companies}
         )
+        log_message = f"User {request.user.id} has requested to create user with name "
+        log_message += f"'{request.data.get('username')}' and email '{request.data.get('email')}'"
+        create_user_logger.info(log_message)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                data={"message": "User created successfully wait for admin approval"}, status=status.HTTP_201_CREATED
-            )
+            create_user_logger.info("User created successfully")
+            return Response(data={"message": "User created successfully "}, status=status.HTTP_201_CREATED)
+
         else:
+            create_user_logger.info(serializer.errors)
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=["POST"])
     def sign_in(self, request):
+        sign_in_logger = setup_logger("sign_in", "./logs/sign_in_log_file.txt")
         serializer = SignInSerializer(data=request.data)
+
         if serializer.is_valid():
             try:
                 user = User.objects.get(email=request.data["email"])
                 if user.check_password(request.data["password"]):
                     if self.verify_otp(user, request.data["otp"]):
+                        sign_in_logger.info(f" user with  email '{request.data.get('email')} has signed in ")
+
                         refresh = RefreshToken.for_user(user)
                         return Response(
                             data={
@@ -95,7 +106,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
                 user = User.objects.get(email=request.data["email"])
                 generate_user_secret_key(user)
                 image_stream = generate_otp_qrcode(user)
-                send_mail_to_user(request.data["email"], image_stream)
+                send_mail_to_user(request.data["email"], image_stream, "reset_password")
                 return Response(
                     data={"user": user.id, "message": "Comfirmation mail has been sent to your Email "},
                     status=status.HTTP_200_OK,
@@ -125,12 +136,15 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     @action(detail=False, methods=["POST"])
     def reset_password(self, request):
+        reset_password_logger = setup_logger("reset_password", "./logs/reset_password_log_file.txt")
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 user = request.user
                 user.password = make_password(request.data["password"])
                 user.save()
+                reset_password_logger.info(f" user with  id  {user.id} has changed his/her password ")
+
                 return Response(data={"message": "password has been successfully changed"}, status=status.HTTP_200_OK)
             except User.DoesNotExist:
                 return Response(data={"message": "there is no user with such ID"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -155,11 +169,13 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     @action(detail=True, methods=["post"])
     def activate_company(self, request, pk):
+        activate_company_logger = setup_logger("activate_company", "./logs/activate_company_log_file.txt")
         try:
             user = request.user
             company = user.companies.get(id=pk)
             user.company = company
             user.save()
+            activate_company_logger.info(f" user with  id  {user.id} is now working on company {pk} ")
             return Response(data={"message": "Company successfully activated"}, status=status.HTTP_200_OK)
         except Company.DoesNotExist:
             return Response(data={"message": "you cant activate this company"}, status=status.HTTP_400_BAD_REQUEST)
@@ -172,7 +188,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     def get_permissions(self):
         if self.action in (
-            # "signup",
+            # "create_user",
             "sign_in",
             "reset_password_send_email",
             "reset_password_validate_otp",
